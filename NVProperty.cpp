@@ -4,90 +4,76 @@
  * 30826 Garbsen (Hannover) Germany
  */
 
-
 #ifdef ARDUINO
-#ifndef __NVPROPERTY_H__
-#define __NVPROPERTY_H__
 
 #include <Arduino.h>
-#include <NVPropertyInterface.h>
-#include <NVSRAMProperty.h>
-#include <NVFLASHProperty.h>
+#include <NVPropertyProviderInterface.h>
+#include <NVProperty_SRAM.h>
+#ifdef ARDUINO_ARCH_ESP32
+  #include <NVProperty_ESP32NVS.h>
+  #include <NVProperty_ESP32efuse.h>
+#endif
 #include <NVProperty.h>
 
+
+NVProperty::NVProperty()
+{
+    _flash = NULL;
+    _otp = NULL;
+    _ram = new NVProperty_SRAM();
+    
 #ifdef ARDUINO_ARCH_ESP32
-#include <soc/efuse_reg.h>
+    _flash = new NVProperty_ESP32NVS();
+#else
+#error "unsupported FLASH store implementation"
 #endif
 
-/*
- * NVS.h allows to store properties.
- */
+#ifdef ARDUINO_ARCH_ESP32
+    _otp = new NVProperty_ESP32efuse();
+#else
+#error "unsupported OTP store implementation"
+#endif
+    _allowWrite = false;
+    _didOpen = false;
+}
+
+NVProperty::~NVProperty()
+{
+#if 0
+    if (_ram)
+    	delete _ram;
+	if (_flash)
+        delete _flash;
+    if (_otp)
+        delete _otp;
+#endif
+}
+
 
 int
 NVProperty::GetProperty(int key, int defaultValue)
 {
-    int value = 0;
     int res;
     
-    res = SRAM_GetProperty(key);	// RAM first
-    if (res != NVP_ENOENT)
-        return res;
-    res = FLASH_GetProperty(key);	// FLASH second
-    if (res != NVP_ENOENT)
-        return res;
-
-    // OTP third
-    switch(key) {
-#ifdef ARDUINO_ARCH_ESP32
-        case RTC_AGING_CAL: {
-            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
-            uint32_t v = (*val & 0xff000000) >> 24;
-            if (v == 0xff || v == 0)
-            	return defaultValue;
-            value = v;
-        }
-        break;
-        case LORA_DEVICE_ID: {
-            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
-            uint32_t v = (*val & 0x00ffffff);
-            if (v == 0x00ffffff || v == 0)
-            	return defaultValue;
-            value = v;
-        }
-        break;
-        case LORA_CODE_ID: {
-            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA7_REG;
-            if (*val == 0xffffffff || *val == 0)
-	            return defaultValue;
-            value = *val;
-        }
-        case ADC_VREF: {
-            uint32_t stepSize = 7;
-            uint32_t signbit = 0x10;
-            uint32_t databits = 0x0f;
-            int stepsize = 7;
-            uint32_t *val = (uint32_t *)EFUSE_BLK0_RDATA4_REG;
-            uint32_t v = (*val >> 8) & 0x1f;
-            bool sign = v & signbit;
-            if (sign)
-            	v = -((v & databits));
-            else
-            	v = v & databits;
-            if (!v)
-            	v = 1100;
-            else
-            	v = 1100 + (v * stepsize);
-            value = v;
-        }
-        break;
-    	default:
-            value =  defaultValue;
-#else
-    	default:
-    		value =  defaultValue;
-#endif
+    if (!_didOpen)
+        OpenPropertyStore();
+    
+    if (_ram) {
+        res = _ram->GetProperty(key);
+        if (res != NVP_ENOENT)
+            return res;
     }
-    return value;
+    if (_flash) {
+        res = _flash->GetProperty(key);
+        if (res != NVP_ENOENT)
+            return res;
+    }
+    if (_otp) {
+        res = _otp->GetProperty(key);
+        if (res != NVP_ENOENT)
+            return res;
+    }
+    return defaultValue;
 }
 
 
@@ -96,13 +82,24 @@ NVProperty::GetProperty64(int key, int64_t defaultValue)
 {
     int64_t res;
     
-    res = SRAM_GetProperty64(key);	// RAM first
-    if (res != NVP_ENOENT)
-        return res;
-    res = FLASH_GetProperty64(key);	// FLASH second
-    if (res != NVP_ENOENT)
-        return res;
-    
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (_ram) {
+        res = _ram->GetProperty64(key);
+        if (res != NVP_ENOENT)
+            return res;
+    }
+    if (_flash) {
+        res = _flash->GetProperty64(key);
+        if (res != NVP_ENOENT)
+            return res;
+    }
+    if (_otp) {
+        res = _otp->GetProperty64(key);
+        if (res != NVP_ENOENT)
+            return res;
+    }
     return defaultValue;
 }
 
@@ -111,11 +108,25 @@ NVProperty::GetProperty(int key, const char *defaultValue)
 {
     const char *res;
     
-    res = SRAM_GetPropertyStr(key);	// RAM first
-    if (res)
-        return res;
-    res = FLASH_GetPropertyStr(key);	// FLASH second
-    if (res)
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (_ram) {
+        res = _ram->GetPropertyStr(key);
+        if (res != NULL)
+            return res;
+    }
+    if (_flash) {
+        res = _flash->GetPropertyStr(key);
+        if (res != NULL)
+            return res;
+    }
+    if (_otp) {
+        res = _otp->GetPropertyStr(key);
+        if (res != NULL)
+            return res;
+    }
+    if (res != NULL)
         return res;
     
     return defaultValue;
@@ -124,6 +135,9 @@ NVProperty::GetProperty(int key, const char *defaultValue)
 int
 NVProperty::GetProperty(int key, void  *buffer, int bsize)
 {
+    if (!_didOpen)
+        OpenPropertyStore();
+
     // TODO
     // how to return the size?
     return NVP_OK;
@@ -133,89 +147,168 @@ NVProperty::GetProperty(int key, void  *buffer, int bsize)
 uint64_t
 NVProperty::GetPropertySize(int key)
 {
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    // TODO
     return 0;
 }
 
 int
 NVProperty::SetProperty(int key, NVPType ptype, int64_t value, NVPStore store)
 {
-    if (store == S_OTP) {
-        
-    } else if (store == S_FLASH) {
-        return FLASH_SetProperty(key, value, ptype);
-    } else if (store == S_RAM) {
-        switch(ptype) {
-            case T_32BIT:
-                return SRAM_SetProperty(key, value, ptype);
-                break;
-            case T_STR:
-                return NVP_ERR_FAIL;
-            case T_BLOB:
-                return NVP_ERR_FAIL;
-                
-            default:
-                return NVP_ERR_FAIL;
-        }
-        return NVP_OK;
+    int res = NVP_OK;
+    
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (!_allowWrite)
+        return NVP_NO_PERM;
+    
+    if (store == S_RAM && _ram) {
+        	res = _ram->SetProperty(key, value, ptype);
+    } else if (store == S_FLASH && _flash) {
+            res = _flash->SetProperty(key, value, ptype);
+    } else if (store == S_OTP && _otp) {
+            res = _otp->SetProperty(key, value, ptype);
+    } else {
+        return NVP_NO_STORE;
     }
-    return NVP_ERR_FAIL;
+    return res;
 }
 
 
 int
 NVProperty::SetProperty(int key, NVPType ptype, const char *value, NVPStore store)
 {
-	if (store == S_FLASH) {
-    	return FLASH_SetPropertyStr(key, value, ptype);
-	} else if (store == S_RAM) {
-        return SRAM_SetPropertyStr(key, value, ptype);
+    int res = NVP_OK;
+    
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (!_allowWrite)
+        return NVP_NO_PERM;
+
+    if (store == S_RAM && _ram) {
+        res = _ram->SetPropertyStr(key, value, ptype);
+    } else if (store == S_FLASH && _flash) {
+        res = _flash->SetPropertyStr(key, value, ptype);
+    } else if (store == S_OTP && _otp) {
+        res = _otp->SetPropertyStr(key, value, ptype);
+    } else {
+        return NVP_NO_STORE;
     }
-    return NVP_NO_STORE;
+    
+    return res;
 }
+
+
 
 int
 NVProperty::SetProperty(int key, NVPType ptype,  const void *blob, int length, NVPStore store)
 {
-    return NVP_OK;
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (!_allowWrite)
+        return NVP_NO_PERM;
+
+    // TODO
+    return NVP_NO_STORE;
 }
 
 int
 NVProperty::EraseProperty(int key, NVPStore store)
 {
-    if (store == S_OTP) {
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    int res = NVP_OK;
+    
+    if (!_allowWrite)
         return NVP_NO_PERM;
-    } else if (store == S_FLASH) {
-        return FLASH_EraseProperty(key);
-    } else if (store == S_RAM) {
-            return SRAM_EraseProperty(key);
+
+    if (store == S_RAM && _ram) {
+        res = _ram->EraseProperty(key);
+    } else if (store == S_FLASH && _flash) {
+        res = _flash->EraseProperty(key);
+    } else if (store == S_OTP && _otp) {
+        res = _otp->EraseProperty(key);
+    } else {
+        return NVP_NO_STORE;
     }
-    return NVP_OK;
+    
+    return res;
 }
 
 int
 NVProperty::ReorgProperties(NVPStore store)
 {
-    return NVP_OK;
+    int res = NVP_OK;
+    
+    if (!_didOpen)
+        OpenPropertyStore();
+
+    if (!_allowWrite)
+        return NVP_NO_PERM;
+
+    if (store == S_RAM && _ram) {
+        res = _ram->ReorgProperties();
+    } else if (store == S_FLASH && _flash) {
+        res = _flash->ReorgProperties();
+    } else if (store == S_OTP && _otp) {
+        res = _otp->ReorgProperties();
+    } else {
+        return NVP_NO_STORE;
+    }
+    
+    return res;
 }
 
 int
 NVProperty::OpenPropertyStore(bool forWrite)
 {
-    FLASH_OpenPropertyStore(forWrite);
+    int res = NVP_OK;
+
+    if (_didOpen) {
+        if (_ram)
+            _ram->ClosePropertyStore();
+        if (_flash)
+            _flash->ClosePropertyStore();
+        if (_otp)
+            _otp->ClosePropertyStore();
+    }
     
-    return NVP_OK;
+    if (_ram)
+        _ram->OpenPropertyStore(forWrite);
+    if (_flash)
+        res = _flash->OpenPropertyStore(forWrite);
+    if (_otp)
+        _otp->OpenPropertyStore(forWrite);
+    _didOpen = true;
+    if(forWrite)
+        _allowWrite = true;
+    
+
+    return res;
 }
 
 int
 NVProperty::ClosePropertyStore(bool flush)
 {
-    FLASH_ClosePropertyStore();
-    return NVP_OK;
+    int res = NVP_OK;
+
+    if (_didOpen)
+        return NVP_NO_PERM;
+
+    if (_ram)
+        _ram->ClosePropertyStore(flush);
+    if (_flash)
+        res = _flash->ClosePropertyStore(flush);
+    if (_otp)
+        _otp->ClosePropertyStore(flush);
+    return res;
 }
-
-
-#endif // __NVPROPERTY_H__
-
 #endif
 
 
