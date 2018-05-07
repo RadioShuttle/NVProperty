@@ -39,14 +39,12 @@ NVProperty::NVProperty()
 
 NVProperty::~NVProperty()
 {
-#if 0
     if (_ram)
     	delete _ram;
 	if (_flash)
         delete _flash;
     if (_otp)
         delete _otp;
-#endif
 }
 
 

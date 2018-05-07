@@ -9,6 +9,7 @@
 
 class NVPropertyProviderInterface {
 public:
+   	virtual ~NVPropertyProviderInterface() { }
     virtual int GetProperty(int key) = 0;
     virtual int64_t GetProperty64(int key) = 0;
     virtual const char *GetPropertyStr(int key) = 0;
