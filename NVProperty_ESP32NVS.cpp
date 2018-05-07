@@ -4,6 +4,8 @@
  * 30826 Garbsen (Hannover) Germany
  */
 
+#ifdef ARDUINO_ARCH_ESP32
+
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,7 +14,6 @@
 #include <NVProperty.h>
 
 
-#ifdef ARDUINO_ARCH_ESP32
 #include <nvs.h>
 
 

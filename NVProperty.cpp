@@ -24,14 +24,10 @@ NVProperty::NVProperty()
     
 #ifdef ARDUINO_ARCH_ESP32
     _flash = new NVProperty_ESP32NVS();
-#else
-#error "unsupported FLASH store implementation"
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
     _otp = new NVProperty_ESP32efuse();
-#else
-#error "unsupported OTP store implementation"
 #endif
     _allowWrite = false;
     _didOpen = false;

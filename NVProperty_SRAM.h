@@ -9,6 +9,8 @@
 
 
 #ifdef ARDUINO
+#undef min
+#undef max
 #undef map
 using namespace std;
 #include <map>
