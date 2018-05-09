@@ -27,10 +27,14 @@ NVProperty_ESP32efuse::GetProperty(int key)
     
     switch(key) {
         case NVProperty::RTC_AGING_CAL: {
+            uint32_t RTC_SIGN_BIT = 0x80;
             uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
             uint32_t v = (*val & 0xff000000) >> 24;
             if (v == 0xff || v == 0)
                 return NVProperty::NVP_ENOENT;
+            if (v & RTC_SIGN_BIT) {
+                v = -(v & (RTC_SIGN_BIT-1));
+            }
             value = v;
         }
         break;
