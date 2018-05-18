@@ -45,15 +45,35 @@ NVProperty_ESP32NVS::GetProperty(int key)
 const char *
 NVProperty_ESP32NVS::GetPropertyStr(int key)
 {
-    static char value[64];
+    char *value;
     size_t len = sizeof(value);
     
-    esp_err_t err = nvs_get_str(_handle, _setKey(key), value, &len);
-    if(!err)
-        return value;
+    esp_err_t err = nvs_get_str(_handle, _setKey(key), NULL, &len);
+    if (!err && len > 0) {
+        /*
+         * Yes we leak memory here, however for the Arduino ESP32 this ok
+         * to make the API easier for users
+         */
+        value = new char[len+1];
+        if (value == NULL)
+            return NULL;
+        memset(value, 0, len+1);
+        esp_err_t err = nvs_get_str(_handle, _setKey(key), value, &len);
+    	if(!err)
+        	return value;
+    }
     
     return NULL; // NVP_ENOENT
 }
+
+int
+NVProperty_ESP32NVS::GetPropertyBlob(int key, const void *blob, int *size)
+{
+	
+    return NVProperty::NVP_OK;
+    // return NVProperty::NVP_ENOENT;
+}
+
 
 int64_t
 NVProperty_ESP32NVS::GetProperty64(int key)

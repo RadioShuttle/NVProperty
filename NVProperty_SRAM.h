@@ -25,6 +25,7 @@ public:
     virtual int GetProperty(int key);
     virtual int64_t GetProperty64(int key);
     virtual const char *GetPropertyStr(int key);
+    virtual int GetPropertyBlob(int key, const void *blob, int *size);
     virtual int SetProperty(int key, int64_t value, int type);
     virtual int SetPropertyStr(int key, const char *value, int type);
     virtual int SetPropertyBlob(int key, const void *blob, int size, int type);

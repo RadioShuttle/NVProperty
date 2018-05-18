@@ -12,6 +12,7 @@ class NVProperty_ESP32efuse : public NVPropertyProviderInterface {
 public:
     virtual int GetProperty(int key);
     virtual int64_t GetProperty64(int key);
+    virtual int GetPropertyBlob(int key, const void *blob, int *size);
     virtual const char *GetPropertyStr(int key);
     virtual int SetProperty(int key, int64_t value, int type);
     virtual int SetPropertyStr(int key, const char *value, int type);

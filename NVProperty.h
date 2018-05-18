@@ -54,10 +54,10 @@ public:
     int64_t GetProperty64(int key, int64_t defaultValue = 0);
     const char *GetProperty(int key, const char *defaultValue = NULL);
     /*
-     * when block gets returned and the buffer is filled up to the property
+     * when a block gets returned the buffer is filled up to the property
      * or max at the bsize length.
      */
-    int GetProperty(int key, void  *buffer, int len);
+    int GetProperty(int key, void  *buffer, int *size);
     /*
      * GetPropertySize will be helpful for getting blob or string sizes.
      */

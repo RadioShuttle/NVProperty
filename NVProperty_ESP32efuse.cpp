@@ -92,6 +92,12 @@ NVProperty_ESP32efuse::GetPropertyStr(int key)
 }
 
 int
+NVProperty_ESP32efuse::GetPropertyBlob(int key, const void *blob, int *size)
+{
+    return NVProperty::NVP_ENOENT;
+}
+
+int
 NVProperty_ESP32efuse::SetProperty(int key, int64_t value, int type)
 {
     return NVProperty::NVP_ERR_FAIL;

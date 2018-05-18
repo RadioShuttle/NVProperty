@@ -80,6 +80,29 @@ NVProperty_SRAM::GetPropertyStr(int key)
     return NULL;
 }
 
+int
+
+NVProperty_SRAM::GetPropertyBlob(int key, const void *blob, int *size)
+{
+    if (!blob || *size <= 0)
+        return NVProperty::NVP_INVALD_PARM;
+    
+    map<int, PropertyEntry>::iterator it = _props.find(key);
+    if(it != _props.end()) {
+        switch (it->second.type) {
+            case NVProperty::T_BLOB:
+                *size = std::min(*size, (int)it->second.size);
+				if (blob)
+                	memcpy((void *)blob, it->second.data, *size);
+                return *size;
+                break;
+            default:
+                break;
+        }
+    }
+    return NVProperty::NVP_ENOENT;
+}
+
 
 int
 NVProperty_SRAM::SetProperty(int key, int64_t value, int type)

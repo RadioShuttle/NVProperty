@@ -127,14 +127,31 @@ NVProperty::GetProperty(int key, const char *defaultValue)
 }
 
 int
-NVProperty::GetProperty(int key, void  *buffer, int bsize)
+NVProperty::GetProperty(int key, void *buffer, int *size)
 {
+    int res;
+    int maxsize = *size;
+    
     if (!_didOpen)
         OpenPropertyStore();
 
-    // TODO
-    // how to return the size?
-    return NVP_OK;
+    if (_ram) {
+        res = _ram->GetPropertyBlob(key, buffer, &maxsize);
+        if (res == NVP_OK)
+            return res;
+    }
+    if (_flash) {
+        res = _flash->GetPropertyBlob(key, buffer, &maxsize);
+        if (res == NVP_OK)
+            return res;
+    }
+    if (_otp) {
+        res = _otp->GetPropertyBlob(key, buffer, &maxsize);
+        if (res == NVP_OK)
+            return res;
+    }
+ 
+    return NVP_ENOENT;
 }
 
 
