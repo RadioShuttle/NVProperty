@@ -83,6 +83,8 @@ public:
         LORA_DEVICE_ID	= 2, // uint32_t the LoRa device ID
         LORA_CODE_ID	= 3, // uint32_t the Code for the RadioShuttle protocol
         ADC_VREF		= 4, // the adc refernce volatge in millivolt
+        WIFI_SSID		= 5,
+        WIFI_PASSWORD	= 6,
         
         PRIVATE_RANGE_START = 128,
         PRIVATE_RANGE_END 	= 254,
