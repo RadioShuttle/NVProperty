@@ -80,11 +80,32 @@ public:
 
     enum Properties {
         RTC_AGING_CAL	= 1, // int8_t the RTC aging calibration value
-        LORA_DEVICE_ID	= 2, // uint32_t the LoRa device ID
-        LORA_CODE_ID	= 3, // uint32_t the Code for the RadioShuttle protocol
-        ADC_VREF		= 4, // the adc refernce volatge in millivolt
-        WIFI_SSID		= 5,
-        WIFI_PASSWORD	= 6,
+        ADC_VREF		= 2, // the adc refernce volatge in millivolt
+        
+        LORA_DEVICE_ID	= 10, // uint32_t the LoRa device ID
+        LORA_CODE_ID	= 11, // uint32_t the Code for the RadioShuttle protocol
+        LORA_REMOTE_ID	= 12, // specifies the server address
+        LORA_REMOTE_ID_ALT = 13, // specifies the alternate server address
+        LORA_FREQUENCY 	= 14,
+        LORA_BANDWIDTH	= 15,
+        LORA_SPREADING_FAKTOR = 16,
+        LORA_TXPOWER	= 17,
+        LORA_FREQUENCY_OFFSET = 18,
+        
+        LOC_LONGITUDE	= 20,
+        LOC_LATITIDE 	= 21,
+        LOC_NAME 		= 22, // a string with the location name
+        HOSTNAME 		= 23,
+        
+        WIFI_SSID		= 30,
+        WIFI_PASSWORD	= 31,
+        WIFI_SSID_ALT	= 32,
+        WIFI_PASSWORD_ALT = 33,
+        USE_DHCP		= 34,
+        MAC_ADDR		= 35,
+        NET_IP_ADDR		= 36,
+        NET_IP_ROUTER	= 37,
+        NET_IP_DNS_SERVER = 38,
         
         PRIVATE_RANGE_START = 128,
         PRIVATE_RANGE_END 	= 254,
