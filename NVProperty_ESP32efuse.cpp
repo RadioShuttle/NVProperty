@@ -1,9 +1,13 @@
 /*
- * The file is licensed under the Apache License, Version 2.0
+ * This is an unpublished work copyright
  * (c) 2017 Helmut Tschemernjak
  * 30826 Garbsen (Hannover) Germany
+ *
+ *
+ * Use is granted to registered RadioShuttle licensees only.
+ * Licensees must own a valid serial number and product code.
+ * Details see: www.radioshuttle.de
  */
-
 
 #ifndef __NVPROPERTY_ESP32EFUSE_H__
 #define __NVPROPERTY_ESP32EFUSE_H__
@@ -38,21 +42,6 @@ NVProperty_ESP32efuse::GetProperty(int key)
             value = v;
         }
         break;
-        case NVProperty::LORA_DEVICE_ID: {
-            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
-            uint32_t v = (*val & 0x00ffffff);
-            if (v == 0x00ffffff || v == 0)
-                return NVProperty::NVP_ENOENT;
-            value = v;
-        }
-        break;
-        case NVProperty::LORA_CODE_ID: {
-            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA7_REG;
-            if (*val == 0xffffffff || *val == 0)
-                return NVProperty::NVP_ENOENT;
-            value = *val;
-        }
-        break;
         case NVProperty::ADC_VREF: {
             uint32_t stepsize = 7;
             uint32_t signbit = 0x10;
@@ -71,6 +60,30 @@ NVProperty_ESP32efuse::GetProperty(int key)
             value = v;
         }
         break;
+        case NVProperty::HARDWARE_REV: {
+            /*
+             * TODO: Find a place for our hardware revision
+             * maybe we can code features like LoRa, RTC, Booster, etc.
+             * For the ESP32 8 bit storage should be sufficient.
+             */
+            value = 0;
+        }
+        break;
+        case NVProperty::LORA_DEVICE_ID: {
+            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
+            uint32_t v = (*val & 0x00ffffff);
+            if (v == 0x00ffffff || v == 0)
+                return NVProperty::NVP_ENOENT;
+            value = v;
+        }
+            break;
+        case NVProperty::LORA_CODE_ID: {
+            uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA7_REG;
+            if (*val == 0xffffffff || *val == 0)
+                return NVProperty::NVP_ENOENT;
+            value = *val;
+        }
+            break;
     	default:
             return NVProperty::NVP_ENOENT;
     }

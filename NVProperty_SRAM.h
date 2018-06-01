@@ -1,7 +1,12 @@
 /*
- * The file is licensed under the Apache License, Version 2.0
+ * This is an unpublished work copyright
  * (c) 2017 Helmut Tschemernjak
  * 30826 Garbsen (Hannover) Germany
+ *
+ *
+ * Use is granted to registered RadioShuttle licensees only.
+ * Licensees must own a valid serial number and product code.
+ * Details see: www.radioshuttle.de
  */
 
 #ifndef __NVSProperty_SRAM__
