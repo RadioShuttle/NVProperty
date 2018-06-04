@@ -115,6 +115,9 @@ public:
         NET_IP_ROUTER	= 37,
         NET_IP_DNS_SERVER = 38,
         
+        MQTT_SERVER		= 40,
+        MQTT_SERVER_ALT	= 41,
+        
         PRIVATE_RANGE_START = 128,
         PRIVATE_RANGE_END 	= 254,
         MAX_PROPERTIES		= 255,
