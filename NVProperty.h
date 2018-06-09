@@ -94,7 +94,7 @@ public:
         LORA_REMOTE_ID_ALT = 13, // specifies the alternate server address
         LORA_FREQUENCY 	= 14,	// channel frequency in Hz, e.g. 868100000
         LORA_BANDWIDTH	= 15,	// channel bandwidth in Hz, e.g. 125000
-        LORA_SPREADING_FAKTOR = 16, // e.g. 7
+        LORA_SPREADING_FACTOR = 16, // e.g. 7
         LORA_TXPOWER	= 17,	// e.g. 14 for 15 dBm.
         LORA_FREQUENCY_OFFSET = 18,
         LORA_AES_KEY	= 19,	// AES keys are per app, there are only two placeholders
