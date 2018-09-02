@@ -17,6 +17,10 @@
 #ifdef ARDUINO_ARCH_ESP32
   #include <NVProperty_ESP32NVS.h>
   #include <NVProperty_ESP32efuse.h>
+#elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
+  #include <NVProperty_D21Flash.h>
+#else
+#error "Unkown implementation"
 #endif
 #include <NVProperty.h>
 
@@ -29,6 +33,10 @@ NVProperty::NVProperty()
     
 #ifdef ARDUINO_ARCH_ESP32
     _flash = new NVProperty_ESP32NVS();
+#elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
+    _flash = new NVProperty_D21Flash();
+#else
+ #error "unkown platform"
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
