@@ -9,9 +9,6 @@
  * Details see: www.radioshuttle.de
  */
 
-#ifndef __NVPROPERTY_ESP32EFUSE_H__
-#define __NVPROPERTY_ESP32EFUSE_H__
-
 #ifdef ARDUINO_ARCH_ESP32
 
 #include <Arduino.h>
@@ -157,5 +154,3 @@ NVProperty_ESP32efuse::ClosePropertyStore(bool flush)
 }
 
 #endif // ARDUINO_ARCH_ESP32
-
-#endif // __NVPROPERTY_ESP32EFUSE_H__
