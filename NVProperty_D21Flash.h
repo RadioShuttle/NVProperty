@@ -14,7 +14,7 @@
 
 class NVProperty_D21Flash : public NVPropertyProviderInterface {
 public:
-	NVProperty_D21Flash();
+	NVProperty_D21Flash(int propSizekB = 2);
 	~NVProperty_D21Flash();
 	
     virtual int GetProperty(int key);
@@ -42,13 +42,17 @@ private:
 		uint16_t sizeKB;
 	};
 	
-	static const int FLASH_ENTRY_HEADER	= 4;
+	static const int FLASH_ENTRY_HEADER			= 4;
+	static const int FLASH_ENTRY_HEADER_SHORT	= 2;
 	struct _flashEntry {
 		uint8_t key;	// Property key
 		union {
 			struct {
-				uint8_t deleted : 1;
-				uint8_t type : 7;	 // NVPType
+				uint8_t deleted	: 1; // this key has been deleted
+				uint8_t t_bit  	: 1; // contains the bool value
+				uint8_t reserv1	: 1; //
+				uint8_t reserv2	: 1; //
+				uint8_t type   	: 4; // NVPType
 			} t;
 		} ut;
 		uint8_t len;	// length;
@@ -56,7 +60,6 @@ private:
 			struct {
 				uint8_t f_padeven 		: 1; // the length has been padded to an even size;
 				uint8_t f_str_zero_term : 1; // the string has a zero byte added.
-				uint8_t f_t_bit    		: 1; // contains the bool value
 				uint8_t f_reserv1  		: 5;
 			} flags;
 			int8_t	v_8bit;
@@ -69,17 +72,20 @@ private:
 			uint8_t v_blob[256];
 		} data;
 	};
-	_flashEntry * _GetFlashEntry(int key);
+	
+	_flashEntry * _GetFlashEntry(int key, uint8_t *start = NULL);
+	int _GetFlashEntryLen(_flashEntry *k);
 	_flashEntry *_lastEntry;
-
 	void _DumpAllEntires(void);
+	int _FlashReorgEntries(int minRequiredSpace);
+	bool _debug;
+	int _propSizekB;
 	int _pageSize;
 	int _numPages;
 	int _rowSize;
 	uint8_t *_startAddress;
 	uint8_t *_endAddress;
 
-	static const int MAX_FLASH_PROP_SIZE = 2; // in kB
 	static const int FLASH_PROP_MAGIC = 0x4c6f5261; // "LORA"
 	static const int FLASH_PROP_VERSION = 2;
 };
