@@ -12,9 +12,13 @@
 #ifndef __NVPROPERTY_H__
 #define __NVPROPERTY_H__
 
+#ifndef UNUSED
+ #define UNUSED(x) (void)(x)
+#endif
+
 class NVProperty {
 public:
-    NVProperty();
+    NVProperty(int propSizekB = 8);
     ~NVProperty();
 public:
     enum NVPType {
@@ -61,12 +65,9 @@ public:
     /*
      * when a block gets returned the buffer is filled up to the property
      * or max at the bsize length.
+	 * if the buffer is NULL only the size field should to set
      */
     int GetProperty(int key, void  *buffer, int *size);
-    /*
-     * GetPropertySize will be helpful for getting blob or string sizes.
-     */
-    uint64_t GetPropertySize(int key);
 
     /*
      * SetProperty
@@ -119,7 +120,7 @@ public:
         MQTT_SERVER_ALT	= 41,
 		MQTT_TOPIC_INFO	= 42,
 		MQTT_TOPIC_ALARM= 43,
-		MQTT_TOPIC_CONTROL = 044,
+		MQTT_TOPIC_CONTROL = 44,
 		MQTT_TOPIC_4	= 45,
 		MQTT_TOPIC_5	= 46,
 		
@@ -128,6 +129,7 @@ public:
         PRIVATE_RANGE_START = 128,
         PRIVATE_RANGE_END 	= 254,
         PROPERTIES_EOF		= 255,
+		MAX_PROPERTIES		= 256,
     };
 
 private:

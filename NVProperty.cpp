@@ -25,7 +25,7 @@
 #include <NVProperty.h>
 
 
-NVProperty::NVProperty()
+NVProperty::NVProperty(int propSizekB)
 {
     _flash = NULL;
     _otp = NULL;
@@ -34,7 +34,7 @@ NVProperty::NVProperty()
 #ifdef ARDUINO_ARCH_ESP32
     _flash = new NVProperty_ESP32NVS();
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
-    _flash = new NVProperty_D21Flash();
+    _flash = new NVProperty_D21Flash(propSizekB);
 #else
  #error "unkown platform"
 #endif
@@ -168,16 +168,6 @@ NVProperty::GetProperty(int key, void *buffer, int *size)
 }
 
 
-uint64_t
-NVProperty::GetPropertySize(int key)
-{
-    if (!_didOpen)
-        OpenPropertyStore();
-
-    // TODO
-    return 0;
-}
-
 int
 NVProperty::SetProperty(int key, NVPType ptype, int64_t value, NVPStore store)
 {
@@ -226,19 +216,31 @@ NVProperty::SetProperty(int key, NVPType ptype, const char *value, NVPStore stor
     return res;
 }
 
+// NVProperty_SRAM::SetPropertyBlob(int key, const void *blob, int size, int type)
 
 
 int
 NVProperty::SetProperty(int key, NVPType ptype,  const void *blob, int length, NVPStore store)
 {
+    int res = NVP_OK;
+
     if (!_didOpen)
         OpenPropertyStore();
 
     if (!_allowWrite)
         return NVP_NO_PERM;
+ 	
+  	if (store == S_RAM && _ram) {
+        res = _ram->SetPropertyBlob(key, blob, length, ptype);
+    } else if (store == S_FLASH && _flash) {
+        res = _flash->SetPropertyBlob(key, blob, length, ptype);
+    } else if (store == S_OTP && _otp) {
+        res = _otp->SetPropertyBlob(key, blob, length, ptype);
+    } else {
+        return NVP_NO_STORE;
+    }
 
-    // TODO
-    return NVP_NO_STORE;
+    return res;
 }
 
 int
