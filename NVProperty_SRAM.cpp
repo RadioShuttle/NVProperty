@@ -210,11 +210,13 @@ NVProperty_SRAM::ReorgProperties(void)
 int
 NVProperty_SRAM::OpenPropertyStore(bool forWrite)
 {
+	UNUSED(forWrite);
     return NVProperty::NVP_OK;
 }
 
 int
 NVProperty_SRAM::ClosePropertyStore(bool flush)
 {
+	UNUSED(flush);
     return NVProperty::NVP_OK;
 }
