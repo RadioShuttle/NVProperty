@@ -25,7 +25,7 @@
 #include "arduino-util.h"
 
 NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB) {
-	_debug = true;
+	_debug = false;
 	_propSizekB = propSizekB;
 	_pageSize = 8 << NVMCTRL->PARAM.bit.PSZ;
 	_numPages = NVMCTRL->PARAM.bit.NVMP;
@@ -268,17 +268,7 @@ NVProperty_D21Flash::_GetFlashEntry(int key, uint8_t *start)
 		if (p->key == key)
 			lastP = p;
 
-		int len = p->len;
-		if (p->ut.t.type == NVProperty::T_STR || p->ut.t.type == NVProperty::T_BLOB) {
-			if (p->u.flags.f_str_zero_term)
-				len++;
-			if (p->u.flags.f_padeven)
-				len++;
-		}
-		if (p->ut.t.type == NVProperty::T_BIT || p->ut.t.deleted)
-			p = (_flashEntry *)((uint8_t *)p + FLASH_ENTRY_HEADER_SHORT);
-		else
-			p = (_flashEntry *)((uint8_t *)p + FLASH_ENTRY_HEADER + len);
+		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
 	}
 	return lastP;
 }
@@ -307,7 +297,11 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 			value = p->u.v_8bit;
 			break;
 		case NVProperty::T_16BIT:
-			value = p->data.v_16bit;
+			{
+				int16_t v;
+				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				value = v;
+			}
 			break;
 		case NVProperty::T_32BIT:
 			{
@@ -336,17 +330,8 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 		} else {
 			dprintf("Dump[%.2d] Key: %d Type: %d value: %ld (0x%x)", index, p->key, p->ut.t.type, (int32_t)value, (int32_t)value);
 		}
-		int len = p->len;
-		if (p->ut.t.type == NVProperty::T_STR || p->ut.t.type == NVProperty::T_BLOB) {
-			if (p->u.flags.f_str_zero_term)
-				len++;
-			if (p->u.flags.f_padeven)
-				len++;
-		}
-		if (p->ut.t.type == NVProperty::T_BIT || p->ut.t.deleted)
-			p = (_flashEntry *)((uint8_t *)p + FLASH_ENTRY_HEADER_SHORT);
-		else
-			p = (_flashEntry *)((uint8_t *)p + FLASH_ENTRY_HEADER + len);
+		
+		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
 	}
 	int freebytes = _endAddress -(uint8_t *)_lastEntry;
 	if (_lastEntry)
@@ -378,8 +363,10 @@ int
 NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 {
 
-	if (_debug)
+	if (_debug) {
 		dprintf("_FlashReorgEntries: start");
+		// _DumpAllEntires();
+	}
 
 	int totalLen = 0;
 	int freeSpace = 0;
@@ -411,12 +398,11 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	/*
 	 * Copy header
 	 * while (content {
-	 	- scan until tmp page is full
-		- write page
+	 *	- scan until tmp page is full
+	 *	- write page
 	 * }
 	 * Erase remaining pages.
 	 *
-	 * xxxx
 	 */
 	p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
 	uint8_t *saveddata = new uint8_t[_rowSize+sizeof(struct _flashEntry)];
@@ -440,9 +426,12 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 			copiedKeys.set(k->key);
 			if (t - saveddata >= _rowSize) { // copy page
 				_FlashEraseRow(currentRow);
-				_FlashWritePage(currentRow * _rowSize, 0, saveddata, _rowSize);
-				t = saveddata;
-				currentRow++;
+				_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, _rowSize);
+				int remainLen = (t - saveddata) - _rowSize;
+				if (remainLen) {
+					memcpy(saveddata, t - remainLen, remainLen);
+				}
+				t = saveddata + remainLen;
 			}
 		}
 		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
@@ -450,8 +439,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 
 	if (t > saveddata) { // copy remaining
 		_FlashEraseRow(currentRow);
-		_FlashWritePage(currentRow * _rowSize / _pageSize, 0, saveddata, t - saveddata);
-		currentRow++;
+		_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, t - saveddata);
 	}
 
 	while((uint32_t)0 + currentRow * _rowSize < (uint32_t)_endAddress) {
@@ -462,8 +450,8 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 
 	if (_debug) {
 		dprintf("_FlashReorgEntries: end");
-		// _DumpAllEntires();
-		// delay(1000);
+		_DumpAllEntires();
+		delay(300);
 	}
 	
 	return _endAddress - _startAddress -  (sizeof(_flash_header) + totalCopied);
@@ -490,7 +478,11 @@ NVProperty_D21Flash::GetProperty(int key)
 			value = p->u.v_8bit;
 			break;
 		case NVProperty::T_16BIT:
-			value = p->data.v_16bit;
+			{
+				int16_t v;
+				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				value = v;
+			}
 			break;
 		case NVProperty::T_32BIT:
 			memcpy(&value, &p->data.v_32bit, sizeof(p->data.v_32bit));
@@ -533,7 +525,11 @@ NVProperty_D21Flash::GetProperty64(int key)
 			value = p->u.v_8bit;
 			break;
 		case NVProperty::T_16BIT:
-			value = p->data.v_16bit;
+			{
+				int16_t v;
+				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				value = v;
+			}
 			break;
 		case NVProperty::T_32BIT:
 			{
@@ -656,8 +652,12 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 		return NVProperty::NVP_INVALD_PARM;
 	
 	const char *str = GetPropertyStr(key);
-	if (str && strncmp(value, str, strlen(value)) == 0)
+	if (str && strncmp(value, str, strlen(value)) == 0) {
+		free((void *)str);
 		return NVProperty::NVP_OK;
+	}
+	if (str)
+		free((void *)str);
 
 	int err = NVProperty::NVP_OK;
 	
@@ -691,7 +691,7 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 
 done:
 	delete[] p;
-	_DumpAllEntires();
+	// _DumpAllEntires();
     return err;
 }
 
@@ -708,7 +708,7 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 	}
 	int err = NVProperty::NVP_OK;
 	
-	 p = new _flashEntry[1];
+	p = new _flashEntry[1];
 	if (!p)
 		return NVProperty::NVP_ERR_NOSPACE;
 	memset(p, 0, sizeof(*p));
@@ -737,7 +737,7 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 
 done:
 	delete[] p;
-	_DumpAllEntires();
+	// _DumpAllEntires();
     return err;
 }
 
@@ -766,7 +766,7 @@ NVProperty_D21Flash::EraseProperty(int key)
 	_FlashWrite((uint8_t *)_lastEntry, p, FLASH_ENTRY_HEADER_SHORT);
 	_lastEntry = (_flashEntry *)((uint8_t *)_lastEntry + FLASH_ENTRY_HEADER_SHORT);
 
-	_DumpAllEntires();
+	// _DumpAllEntires();
 	return NVProperty::NVP_OK;
 }
 
