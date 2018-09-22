@@ -24,7 +24,7 @@
 
 #include "arduino-util.h"
 
-NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB) {
+NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 	_debug = false;
 	_propSizekB = propSizekB;
 	_pageSize = 8 << NVMCTRL->PARAM.bit.PSZ;
@@ -43,7 +43,7 @@ NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB) {
 		dprintf("total: %d", _pageSize * _numPages);
 		dprintf("_startAddress: %d", _startAddress);
 	}
-	_FlashInititalize();
+	_FlashInititalize(erase);
 	_GetFlashEntry(0); // inits the _lastEntry record
 	if (_debug)
 		_DumpAllEntires();

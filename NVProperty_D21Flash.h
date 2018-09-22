@@ -14,7 +14,7 @@
 
 class NVProperty_D21Flash : public NVPropertyProviderInterface {
 public:
-	NVProperty_D21Flash(int propSizekB = 2);
+	NVProperty_D21Flash(int propSizekB, bool erase);
 	~NVProperty_D21Flash();
 	
     virtual int GetProperty(int key);
