@@ -25,7 +25,7 @@
 #include <NVProperty.h>
 
 
-NVProperty::NVProperty(int propSizekB)
+NVProperty::NVProperty(int propSizekB, bool erase)
 {
     _flash = NULL;
     _otp = NULL;
@@ -34,7 +34,7 @@ NVProperty::NVProperty(int propSizekB)
 #ifdef ARDUINO_ARCH_ESP32
     _flash = new NVProperty_ESP32NVS();
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
-    _flash = new NVProperty_D21Flash(propSizekB);
+    _flash = new NVProperty_D21Flash(propSizekB, erase);
 #else
  #error "unkown platform"
 #endif

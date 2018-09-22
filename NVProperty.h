@@ -18,7 +18,15 @@
 
 class NVProperty {
 public:
-    NVProperty(int propSizekB = 8);
+	/*
+	 * The property store size depends on the implementation
+	 * The ESP32 uses the NVS partition therefore the size is being ignored.
+	 * The D21 uses the default 8kByte which is a good tradeoff between 
+	 * space needed for the application versus space for properties.
+     * Larger D21 property space (e.g. 20kB) has the advantage that the
+     * flash blocks are less busy.
+ 	 */
+    NVProperty(int propSizekB = 8, bool erase = false);
     ~NVProperty();
 public:
     enum NVPType {
@@ -29,6 +37,7 @@ public:
         T_64BIT	= 5,
         T_STR	= 6,
         T_BLOB	= 7,	/* blobs can be up to 255 bytes long */
+		T_MAX	= 15	// we have only 4 bit space for the NVP types
     };
     
     enum NVPStore {
@@ -61,11 +70,14 @@ public:
      */
     int GetProperty(int key, int defaultValue = 0);
     int64_t GetProperty64(int key, int64_t defaultValue = 0);
+	/*
+	 * const char *GetProperty: receives a copy of the propery, use free to release it.
+	 */
     const char *GetProperty(int key, const char *defaultValue = NULL);
     /*
      * when a block gets returned the buffer is filled up to the property
      * or max at the bsize length.
-	 * if the buffer is NULL only the size field should to set
+	 * if the buffer is NULL only the size value will be set
      */
     int GetProperty(int key, void  *buffer, int *size);
 
@@ -73,15 +85,31 @@ public:
      * SetProperty
      * It requires to use OpenPropertyStore and finally ClosePropertyStore(true)
      * to write out all properties.
+	 * Properties are being limited to 255 bytes. (e.g. 255 long strings or 255 bytes blobs)
      *
+	 * Number properties e.g. 0 or 1, or 123 are highly optimized in storage sizes
+	 * therefore the value is automatically being compressed to a bit or a little
+	 * number to use less flash storage space.
      */
     int SetProperty(int key, NVPType ptype, int64_t value, NVPStore store = S_FLASH);
     int SetProperty(int key, NVPType ptype, const char *value, NVPStore store = S_FLASH);
-    int SetProperty(int key, NVPType ptype,  const void *blob, int length, NVPStore store = S_FLASH);
+    int SetProperty(int key, NVPType ptype, const void *blob, int length, NVPStore store = S_FLASH);
     
     int EraseProperty(int key, NVPStore store = S_FLASH);
-    int ReorgProperties(NVPStore store = S_FLASH);
+	
+	/*
+	 * ReorgProperties is usually not needed because when a property storage is
+	 * full it reorganizes itself to make space for new properties.
+	 */
+	int ReorgProperties(NVPStore store = S_FLASH);
+	/*
+	 * Opens a property store for reading or writing.
+	 */
     int OpenPropertyStore(bool forWrite = false);
+	/*
+	 * Closes the property store and flushes the data, depending on the
+	 * implementation flush may be not needed, e.g. D21
+	 */
     int ClosePropertyStore(bool flush = false);
 
     enum Properties {
