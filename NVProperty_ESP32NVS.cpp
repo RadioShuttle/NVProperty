@@ -74,9 +74,25 @@ NVProperty_ESP32NVS::GetPropertyStr(int key)
 int
 NVProperty_ESP32NVS::GetPropertyBlob(int key, const void *blob, int *size)
 {
-	
-    return NVProperty::NVP_OK;
-    // return NVProperty::NVP_ENOENT;
+    char *value;
+    size_t len = sizeof(value);
+    
+    esp_err_t err = nvs_get_blob(_handle, _setKey(key), NULL, &len);
+    if (!err && len > 0) {
+        /*
+         * Yes we leak memory here, however for the Arduino ESP32 this ok
+         * to make the API easier for users
+         */
+        value = new char[len];
+        if (value == NULL)
+            return NULL;
+        memset(value, 0, len);
+        esp_err_t err = nvs_get_blob(_handle, _setKey(key), value, &len);
+    	if(!err)
+        	return len;
+    }
+    
+    return 0; // NVP_ENOENT
 }
 
 
@@ -135,7 +151,7 @@ NVProperty_ESP32NVS::SetPropertyStr(int key, const char *value, int type)
 
     if (!err) {
         _didWrite = true;
-        return 0;
+        return NVProperty::NVP_OK;
     }
     
     return NVProperty::NVP_ENOENT;
@@ -144,7 +160,18 @@ NVProperty_ESP32NVS::SetPropertyStr(int key, const char *value, int type)
 int
 NVProperty_ESP32NVS::SetPropertyBlob(int key, const void *blob, int size, int type)
 {
-    // TODO maybe convert it to hex.
+    esp_err_t err = 0;
+    
+    if (type != NVProperty::T_BLOB)
+        return NVProperty::NVP_INVALD_PARM;
+    
+    err = nvs_set_blob(_handle, _setKey(key), blob, size);
+
+    if (!err) {
+        _didWrite = true;
+        return NVProperty::NVP_OK;
+    }
+    
     return NVProperty::NVP_ENOENT;
 }
 
