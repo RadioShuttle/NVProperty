@@ -85,7 +85,7 @@ NVProperty_ESP32NVS::GetPropertyBlob(int key, const void *blob, int *size)
          */
         value = new char[len];
         if (value == NULL)
-            return NULL;
+            return 0;
         memset(value, 0, len);
         esp_err_t err = nvs_get_blob(_handle, _setKey(key), value, &len);
     	if(!err)
