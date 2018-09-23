@@ -113,39 +113,40 @@ public:
     int ClosePropertyStore(bool flush = false);
 
     enum Properties {
-        RTC_AGING_CAL	= 1, // int8_t the RTC aging calibration value
-        ADC_VREF		= 2, // the adc refernce volatge in millivolt
-        HARDWARE_REV	= 3, // the hardware revision of the board
+		RTC_AGING_CAL	= 1, // int8_t the RTC aging calibration value
+		ADC_VREF		= 2, // the adc refernce volatge in millivolt
+		HARDWARE_REV	= 3, // the hardware revision of the board
         
-        LORA_DEVICE_ID	= 10, // uint32_t the LoRa device ID
-        LORA_CODE_ID	= 11, // uint32_t the Code for the RadioShuttle protocol
-        LORA_REMOTE_ID	= 12, // specifies the server address
-        LORA_REMOTE_ID_ALT = 13, // specifies the alternate server address
-        LORA_FREQUENCY 	= 14,	// channel frequency in Hz, e.g. 868100000
-        LORA_BANDWIDTH	= 15,	// channel bandwidth in Hz, e.g. 125000
-        LORA_SPREADING_FACTOR = 16, // e.g. 7
-        LORA_TXPOWER	= 17,	// e.g. 14 for 15 dBm.
-        LORA_FREQUENCY_OFFSET = 18,
-        LORA_AES_KEY	= 19,	// AES keys are per app, there are only two placeholders
-        LORA_AES_KEY_ALT = 20,
+		LORA_DEVICE_ID	= 10, // uint32_t the LoRa device ID
+		LORA_CODE_ID	= 11, // uint32_t the Code for the RadioShuttle protocol
+		LORA_REMOTE_ID	= 12, // specifies the server address
+		LORA_REMOTE_ID_ALT = 13, // specifies the alternate server address
+		LORA_RADIO_TYPE	= 14,	// 1 = Offline, 3 = Online, 4 = RS_Station_Basic
+		LORA_FREQUENCY 	= 15,	// channel frequency in Hz, e.g. 868100000
+		LORA_BANDWIDTH	= 16,	// channel bandwidth in Hz, e.g. 125000
+		LORA_SPREADING_FACTOR = 17, // e.g. 7
+		LORA_TXPOWER	= 18,	// e.g. 14 for 15 dBm.
+		LORA_FREQUENCY_OFFSET = 19,
+		LORA_APP_PWD	= 20,	// passwords are per app, there are only two placeholders
+		LORA_APP_PWD_ALT = 21,
+
+		LOC_LONGITUDE	= 25,	// a string
+		LOC_LATITUDE 	= 26,	// a string
+		LOC_NAME 		= 27, 	// a string with the location name
+		HOSTNAME 		= 28,	// the device host name
         
-        LOC_LONGITUDE	= 25,	// a string
-        LOC_LATITUDE 	= 26,	// a string
-        LOC_NAME 		= 27, 	// a string with the location name
-        HOSTNAME 		= 28,	// the device host name
+		WIFI_SSID		= 30,
+		WIFI_PASSWORD	= 31,
+		WIFI_SSID_ALT	= 32,
+		WIFI_PASSWORD_ALT = 33,
+		USE_DHCP		= 34,
+		MAC_ADDR		= 35,
+		NET_IP_ADDR		= 36,
+		NET_IP_ROUTER	= 37,
+		NET_IP_DNS_SERVER = 38,
         
-        WIFI_SSID		= 30,
-        WIFI_PASSWORD	= 31,
-        WIFI_SSID_ALT	= 32,
-        WIFI_PASSWORD_ALT = 33,
-        USE_DHCP		= 34,
-        MAC_ADDR		= 35,
-        NET_IP_ADDR		= 36,
-        NET_IP_ROUTER	= 37,
-        NET_IP_DNS_SERVER = 38,
-        
-        MQTT_SERVER		= 40,	// url mqtt or mqtts://user.password@server:port
-        MQTT_SERVER_ALT	= 41,
+		MQTT_SERVER		= 40,	// url mqtt or mqtts://user.password@server:port
+		MQTT_SERVER_ALT	= 41,
 		MQTT_TOPIC_INFO	= 42,
 		MQTT_TOPIC_ALARM= 43,
 		MQTT_TOPIC_CONTROL = 44,
@@ -154,9 +155,9 @@ public:
 		
 		ALARM_STATUS 	= 50,   // alarm on=0, off !0
 		
-        PRIVATE_RANGE_START = 128,
-        PRIVATE_RANGE_END 	= 254,
-        PROPERTIES_EOF		= 255,
+		PRIVATE_RANGE_START = 128,
+		PRIVATE_RANGE_END 	= 254,
+		PROPERTIES_EOF		= 255,
 		MAX_PROPERTIES		= 256,
     };
 
