@@ -21,12 +21,13 @@ public:
 	/*
 	 * The property store size depends on the implementation
 	 * The ESP32 uses the NVS partition therefore the size is being ignored.
-	 * The D21 uses the default 8kByte which is a good tradeoff between 
+	 * The D21 uses the default 16kByte which is a good tradeoff between
 	 * space needed for the application versus space for properties.
      * Larger D21 property space (e.g. 20kB) has the advantage that the
-     * flash blocks are less busy.
+     * flash blocks are less busy. For the D21 it is a good idea to
+	 * use increments of 16kB because this is the region locking area size
  	 */
-    NVProperty(int propSizekB = 8, bool erase = false);
+    NVProperty(int propSizekB = 16, bool erase = false);
     ~NVProperty();
 public:
     enum NVPType {
