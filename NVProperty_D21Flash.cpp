@@ -323,7 +323,7 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 		case NVProperty::T_16BIT:
 			{
 				int16_t v;
-				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				memcpy(&v, &p->u.v_16bit, sizeof(p->u.v_16bit));
 				value = v;
 			}
 			break;
@@ -339,7 +339,7 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 			break;
 		case NVProperty::T_STR:
 		case NVProperty::T_BLOB:
-			value = p->len;
+			value = p->u.d_len;
 			break;
 		}
 		index++;
@@ -349,8 +349,8 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 		} else if (p->ut.t.type == NVProperty::T_STR) {
 			dprintf("Dump[%.2d] Key: %d Type: %d value: %s", index, p->key, p->ut.t.type, p->data.v_str);
 		} else if (p->ut.t.type == NVProperty::T_BLOB) {
-			dprintf("Dump[%.2d] Key: %d Type: %d len: %d", index, p->key, p->ut.t.type, p->len);
-			dump("Blob",  p->data.v_str, p->len);
+			dprintf("Dump[%.2d] Key: %d Type: %d len: %d", index, p->key, p->ut.t.type, p->u.d_len);
+			dump("Blob",  p->data.v_str, p->u.d_len);
 		} else {
 			dprintf("Dump[%.2d] Key: %d Type: %d value: %ld (0x%x)", index, p->key, p->ut.t.type, (int32_t)value, (int32_t)value);
 		}
@@ -370,8 +370,10 @@ NVProperty_D21Flash::_GetFlashEntryLen(_flashEntry *p)
 	
 	if (p->ut.t.type == NVProperty::T_BIT || p->ut.t.deleted)
 		len = FLASH_ENTRY_HEADER_SHORT;
+	else if (p->ut.t.type == NVProperty::T_8BIT || p->ut.t.type == NVProperty::T_16BIT)
+		len = FLASH_ENTRY_HEADER;
 	else
-		len = FLASH_ENTRY_HEADER + p->len;
+		len = FLASH_ENTRY_HEADER + p->u.d_len;
 		
 	if (p->ut.t.type == NVProperty::T_STR || p->ut.t.type == NVProperty::T_BLOB) {
 		if (p->u.flags.f_str_zero_term)
@@ -504,7 +506,7 @@ NVProperty_D21Flash::GetProperty(int key)
 		case NVProperty::T_16BIT:
 			{
 				int16_t v;
-				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				memcpy(&v, &p->u.v_16bit, sizeof(p->u.v_16bit));
 				value = v;
 			}
 			break;
@@ -520,7 +522,7 @@ NVProperty_D21Flash::GetProperty(int key)
 			break;
 		case NVProperty::T_STR:
 		case NVProperty::T_BLOB:
-			value = p->len;
+			value = p->u.d_len;
 			break;
 	}
 
@@ -551,7 +553,7 @@ NVProperty_D21Flash::GetProperty64(int key)
 		case NVProperty::T_16BIT:
 			{
 				int16_t v;
-				memcpy(&v, &p->data.v_16bit, sizeof(p->data.v_16bit));
+				memcpy(&v, &p->u.v_16bit, sizeof(p->u.v_16bit));
 				value = v;
 			}
 			break;
@@ -567,7 +569,7 @@ NVProperty_D21Flash::GetProperty64(int key)
 			break;
 		case NVProperty::T_STR:
 		case NVProperty::T_BLOB:
-			value = p->len;
+			value = p->u.d_len;
 			break;
 	}
     return value;
@@ -589,7 +591,7 @@ NVProperty_D21Flash::GetPropertyBlob(int key, const void *blob, int *size)
 	if (!p || p->ut.t.type != NVProperty::T_BLOB)
 		return NVProperty::NVP_ENOENT;
 	
-	int cplen = std::min(*size, (int)p->len);
+	int cplen = std::min(*size, (int)p->u.d_len);
 	if (blob)
 		memcpy((void *)blob, p->data.v_blob, cplen);
 	*size = cplen;
@@ -628,34 +630,33 @@ NVProperty_D21Flash::SetProperty(int key, int64_t value, int type)
 
 	switch(storeType) {
 		case NVProperty::T_BIT:
-			p->len = 0;
 			p->ut.t.t_bit = value;
 			break;
 		case NVProperty::T_8BIT:
-			p->len = 0;
 			p->u.v_8bit = value;
 			break;
 		case NVProperty::T_16BIT:
-			p->len = sizeof(p->data.v_16bit);
-			p->data.v_16bit = value;
+			p->u.v_16bit = value;
 			break;
 		case NVProperty::T_32BIT:
-			p->len = sizeof(p->data.v_32bit);
+			p->u.d_len = sizeof(p->data.v_32bit);
 			{
 				int32_t v = value;
 				memcpy(&p->data.v_32bit, &v, sizeof(p->data.v_32bit));
 			}
 			break;
 		case NVProperty::T_64BIT:
-			p->len = sizeof(p->data.v_64bit);
+			p->u.d_len = sizeof(p->data.v_64bit);
 			memcpy(p->data.v_64bit, &value, sizeof(p->data.v_64bit));
 			break;
 	}
 	int len;
 	if (storeType == NVProperty::T_BIT)
 		len = FLASH_ENTRY_HEADER_SHORT;
-	else
-		len = FLASH_ENTRY_HEADER + p->len;
+	else if (storeType == NVProperty::T_8BIT || storeType == NVProperty::T_16BIT)
+		len = FLASH_ENTRY_HEADER;
+	else // 32/64/STR/BLOB
+		len = FLASH_ENTRY_HEADER + p->u.d_len;
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
 		if (!_FlashReorgEntries(len))
 			return NVProperty::NVP_ERR_NOSPACE;
@@ -693,10 +694,10 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 	p->key = key;
 	p->ut.t.type = NVProperty::T_STR;
 	int cplen = std::min(strlen(value), sizeof(p->data.v_str)-1);
-	p->len = cplen;
+	p->u.d_len = cplen;
 	memcpy(p->data.v_str, value, cplen+1);
 	
-	int len = FLASH_ENTRY_HEADER + p->len;
+	int len = FLASH_ENTRY_HEADER + p->u.d_len;
 	p->u.flags.f_str_zero_term = true;
 	len++; // str. zero term
 	if (len & 1) {
@@ -726,7 +727,7 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 		return NVProperty::NVP_INVALD_PARM;
 	
 	_flashEntry *p = _GetFlashEntry(key);
-	if (p && p->ut.t.type == NVProperty::T_BLOB && size == p->len) { // check for duplicate
+	if (p && p->ut.t.type == NVProperty::T_BLOB && size == p->u.d_len) { // check for duplicate
 		if (memcmp(blob, p->data.v_blob, size) == 0)
 			return NVProperty::NVP_OK;
 	}
@@ -740,10 +741,10 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 	p->key = key;
 	p->ut.t.type = NVProperty::T_STR;
 	int cplen = std::min(size, (int)sizeof(p->data.v_blob));
-	p->len = cplen;
+	p->u.d_len = cplen;
 	memcpy(p->data.v_blob, blob, cplen);
 	
-	int len = FLASH_ENTRY_HEADER + p->len;
+	int len = FLASH_ENTRY_HEADER + p->u.d_len;
 
 	if (len & 1) {
 		len++; // padd even

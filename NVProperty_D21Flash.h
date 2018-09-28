@@ -55,17 +55,17 @@ private:
 				uint8_t type   	: 4; // NVPType
 			} t;
 		} ut;
-		uint8_t len;	// length;
 		union {
+			uint8_t d_len;	// data length;
+			int16_t v_16bit;
+			int8_t	v_8bit;
 			struct {
 				uint8_t f_padeven 		: 1; // the length has been padded to an even size;
 				uint8_t f_str_zero_term : 1; // the string has a zero byte added.
 				uint8_t f_reserv1  		: 5;
 			} flags;
-			int8_t	v_8bit;
 		} u;
 		union {
-			int16_t v_16bit;
 			int32_t v_32bit;
 			int32_t v_64bit[2];	// use use 2 x 32-bit to avoid 64-bit struct padding
 			char v_str[256];
@@ -87,7 +87,7 @@ private:
 	uint8_t *_endAddress;
 
 	static const int FLASH_PROP_MAGIC = 0x4c6f5261; // "LORA"
-	static const int FLASH_PROP_VERSION = 2;
+	static const int FLASH_PROP_VERSION = 3;
 };
 
 #endif // __NVPROPERTY_D21FLASHE__
