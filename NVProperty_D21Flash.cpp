@@ -33,6 +33,30 @@ NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 	_startAddress = (uint8_t*)0 + ((_numPages-(_propSizekB * 1024)/_pageSize) * _pageSize);
 	_endAddress = _startAddress + (_propSizekB * 1024);
 	_lastEntry = NULL;
+
+	int flash_lock_bits = NVMCTRL->LOCK.bit.LOCK ^ 0xffff;
+	int lock_regions = 16; // for all D21 MCUs
+	int region_size = (_pageSize * _numPages) / 16; // regions per MCU
+	
+	if (_debug)
+		dprintf("Nvmctrl Locksbits: %x", flash_lock_bits);
+	
+	if (flash_lock_bits) {
+		// disable locks which are set by the BOSSA download, see platforms.txt
+		int cur_bit = flash_lock_bits;
+		for (int i = 0; i < lock_regions; i++) {
+			if (cur_bit & 1) {
+				if (_debug)
+					dprintf("Clearing bit: %d", i);
+				NVMCTRL->STATUS.reg |= NVMCTRL_STATUS_MASK; // Clear error flags
+				NVMCTRL->ADDR.reg = (uint32_t) (i * region_size) / 2;
+				NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_UR; // lock
+				while (!NVMCTRL->INTFLAG.bit.READY)
+					;
+			}
+			cur_bit >>= 1;
+		}
+	}
 	
 	if (_debug) {
 		dprintf("_propSizekB: %d kB", _propSizekB);
@@ -600,7 +624,7 @@ NVProperty_D21Flash::SetProperty(int key, int64_t value, int type)
 	
 	p->key = key;
 	p->ut.t.type = storeType;
-	p->u.v_8bit = 0; // clear flags
+
 
 	switch(storeType) {
 		case NVProperty::T_BIT:
