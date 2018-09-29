@@ -44,32 +44,32 @@ private:
 	
 	static const int FLASH_ENTRY_HEADER			= 4;
 	static const int FLASH_ENTRY_HEADER_SHORT	= 2;
+	static const int MAX_DATA_ENTRY				= 256;
+	
 	struct _flashEntry {
 		uint8_t key;	// Property key
+		struct {
+			uint8_t deleted	: 1; // this key has been deleted
+			uint8_t t_bit  	: 1; // contains the bool value
+			uint8_t reserv1	: 1; //
+			uint8_t reserv2	: 1; //
+			uint8_t type   	: 4; // NVPType
+		} t;
 		union {
-			struct {
-				uint8_t deleted	: 1; // this key has been deleted
-				uint8_t t_bit  	: 1; // contains the bool value
-				uint8_t reserv1	: 1; //
-				uint8_t reserv2	: 1; //
-				uint8_t type   	: 4; // NVPType
-			} t;
-		} ut;
-		union {
-			uint8_t d_len;	// data length;
 			int16_t v_16bit;
 			int8_t	v_8bit;
 			struct {
-				uint8_t f_padeven 		: 1; // the length has been padded to an even size;
+				uint8_t d_len;				 // data length
+				uint8_t f_padeven 		: 1; // the length has been padded to an even size
 				uint8_t f_str_zero_term : 1; // the string has a zero byte added.
-				uint8_t f_reserv1  		: 5;
-			} flags;
+				uint8_t f_reserv1  		: 6;
+			} option;
 		} u;
 		union {
 			int32_t v_32bit;
 			int32_t v_64bit[2];	// use use 2 x 32-bit to avoid 64-bit struct padding
-			char v_str[256];
-			uint8_t v_blob[256];
+			char v_str[MAX_DATA_ENTRY];
+			uint8_t v_blob[MAX_DATA_ENTRY];
 		} data;
 	};
 	
