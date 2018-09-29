@@ -615,9 +615,9 @@ NVProperty_D21Flash::SetProperty(int key, int64_t value, int type)
 	
 	if (value == 0 ||  value == 1)
 		storeType = NVProperty::T_BIT;
-	else if (value > -128 && value < 128)
+	else if (value >= -128 && value < 128)
 		storeType = NVProperty::T_8BIT;
-	else if (value > -32768 && value < 32768)
+	else if (value >= -32768 && value < 32768)
 		storeType = NVProperty::T_16BIT;
 	else if (value > -2147483647 && value < 2147483648)
 		storeType = NVProperty::T_32BIT;
@@ -677,7 +677,7 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 		return NVProperty::NVP_INVALD_PARM;
 	
 	const char *str = GetPropertyStr(key);
-	if (str && strncmp(value, str, strlen(value)) == 0) {
+	if (str && strcmp(value, str) == 0) {
 		free((void *)str);
 		return NVProperty::NVP_OK;
 	}
