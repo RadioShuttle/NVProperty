@@ -61,8 +61,7 @@ private:
 			struct {
 				uint8_t d_len;				 // data length
 				uint8_t f_padeven 		: 1; // the length has been padded to an even size
-				uint8_t f_str_zero_term : 1; // the string has a zero byte added.
-				uint8_t f_reserv1  		: 6;
+				uint8_t f_reserv1  		: 7;
 			} option;
 		} u;
 		union {

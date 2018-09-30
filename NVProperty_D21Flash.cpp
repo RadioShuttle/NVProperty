@@ -376,8 +376,6 @@ NVProperty_D21Flash::_GetFlashEntryLen(_flashEntry *p)
 		len = FLASH_ENTRY_HEADER + p->u.option.d_len;
 		
 	if (p->t.type == NVProperty::T_STR || p->t.type == NVProperty::T_BLOB) {
-		if (p->u.option.f_str_zero_term)
-			len++;
 		if (p->u.option.f_padeven)
 			len++;
 	}
@@ -653,13 +651,12 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 	
 	p->key = key;
 	p->t.type = NVProperty::T_STR;
-	int cplen = std::min(strlen(value), sizeof(p->data.v_str)-1);
+	int cplen = std::min(strlen(value)+1, sizeof(p->data.v_str));
 	p->u.option.d_len = cplen;
-	memcpy(p->data.v_str, value, cplen+1);
+	memcpy(p->data.v_str, value, cplen);
+	p->data.v_str[MAX_DATA_ENTRY-1] = 0; // zero term.
 	
 	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
-	p->u.option.f_str_zero_term = true;
-	len++; // str. zero term
 	if (len & 1) {
 		len++; // padd even
 		p->u.option.f_padeven = true;
