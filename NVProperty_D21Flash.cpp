@@ -375,14 +375,124 @@ NVProperty_D21Flash::_GetFlashEntryLen(_flashEntry *p)
 	else
 		len = FLASH_ENTRY_HEADER + p->u.option.d_len;
 		
-	if (p->t.type == NVProperty::T_STR || p->t.type == NVProperty::T_BLOB) {
-		if (p->u.option.f_padeven)
-			len++;
-	}
+	if (p->t.type == NVProperty::T_STR || p->t.type == NVProperty::T_BLOB)
+		len += _GetFlashPaddingSize(len);
+
 	return len;
 }
 
 
+int
+NVProperty_D21Flash::_GetFlashPaddingSize(int len)
+{
+	if (len & 1)
+		return 1;
+	return 0;
+}
+
+
+int
+NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
+{
+
+	if (_debug) {
+		dprintf("_FlashReorgEntries: start");
+		// _DumpAllEntires();
+	}
+
+	int totalLen = 0;
+	int freeSpace = 0;
+	std::bitset<NVProperty::MAX_PROPERTIES> activeKeys;
+	
+	activeKeys.reset();
+	
+	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
+	while((uint8_t *)p < _endAddress && p->key != 0xff) {
+		if  (!activeKeys.test(p->key)) {
+			_flashEntry *k = _GetFlashEntry(p->key);
+			if (k) {
+				activeKeys.set(p->key);
+				totalLen += _GetFlashEntryLen(k);
+			}
+		}
+		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
+	}
+
+	if (_startAddress + sizeof(_flash_header) + totalLen + minRequiredSpace >= _endAddress)
+			return 0;
+	
+	freeSpace = _endAddress - (_startAddress + sizeof(_flash_header) + totalLen);
+	if (_debug)
+		dprintf("freeSpace: %d, totalLen: %d", freeSpace, totalLen);
+	
+	/*
+	 * Copy header
+	 * while (content {
+	 *	- scan until tmp page is full
+	 *	- write page
+	 * }
+	 * Erase remaining pages.
+	 *
+	 */
+	
+	p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
+	uint8_t *saveddata = new uint8_t[_rowSize+sizeof(struct _flashEntry)];
+	if (!saveddata)
+		return 0;
+	uint8_t *t = saveddata;
+	int currentRow = (uint32_t)_startAddress / _rowSize;
+	int totalCopied = 0;
+	
+	t = saveddata;
+	memcpy(t, _startAddress, sizeof(_flash_header));
+	t += sizeof(_flash_header);
+	
+	while((uint8_t *)p < _endAddress && p->key != 0xff) {
+		_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
+		if (k && k > p) {	// newer entry comes later, skip this version
+			;
+		} else {
+			if (!p->t.deleted) {
+				int plen = _GetFlashEntryLen(p);
+				memcpy(t, p, plen);
+				t += plen;
+				totalCopied += plen;
+				if (t - saveddata >= _rowSize) { // copy page
+					_FlashEraseRow(currentRow);
+					_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, _rowSize);
+					int remainLen = (t - saveddata) - _rowSize;
+					if (remainLen) {
+						memcpy(saveddata, t - remainLen, remainLen);
+					}
+					t = saveddata + remainLen;
+				}
+			}
+		}
+		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
+	}
+
+	if (t > saveddata) { // copy remaining
+		_FlashEraseRow(currentRow);
+		_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, t - saveddata);
+	}
+
+	while((uint32_t)0 + currentRow * _rowSize < (uint32_t)_endAddress) {
+		_FlashEraseRow(currentRow++);
+	}
+	delete[] saveddata;
+	_GetFlashEntry(0); // inits the _lastEntry record
+
+	if (_debug) {
+		dprintf("_FlashReorgEntries: end");
+		_DumpAllEntires();
+		delay(300);
+	}
+	
+	return _endAddress - _startAddress -  (sizeof(_flash_header) + totalCopied);
+}
+
+
+#if 0
 int
 NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 {
@@ -480,6 +590,8 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	
 	return _endAddress - _startAddress -  (sizeof(_flash_header) + totalCopied);
 }
+#endif
+
 
 int
 NVProperty_D21Flash::GetProperty(int key)
@@ -657,10 +769,8 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 	p->data.v_str[MAX_DATA_ENTRY-1] = 0; // zero term.
 	
 	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
-	if (len & 1) {
-		len++; // padd even
-		p->u.option.f_padeven = true;
-	}
+	len += _GetFlashPaddingSize(len);
+
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
 		if (!_FlashReorgEntries(len)) {
 			err = NVProperty::NVP_ERR_NOSPACE;
@@ -702,11 +812,8 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 	memcpy(p->data.v_blob, blob, cplen);
 	
 	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
+	len += _GetFlashPaddingSize(len);
 
-	if (len & 1) {
-		len++; // padd even
-		p->u.option.f_padeven = true;
-	}
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
 		if (!_FlashReorgEntries(len)) {
 			err = NVProperty::NVP_ERR_NOSPACE;

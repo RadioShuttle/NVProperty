@@ -60,8 +60,7 @@ private:
 			int8_t	v_8bit;
 			struct {
 				uint8_t d_len;				 // data length
-				uint8_t f_padeven 		: 1; // the length has been padded to an even size
-				uint8_t f_reserv1  		: 7;
+				uint8_t f_reserv1  		: 8;
 			} option;
 		} u;
 		union {
@@ -74,6 +73,7 @@ private:
 	
 	_flashEntry * _GetFlashEntry(int key, uint8_t *start = NULL);
 	int _GetFlashEntryLen(_flashEntry *k);
+	int _GetFlashPaddingSize(int len);
 	_flashEntry *_lastEntry;
 	void _DumpAllEntires(void);
 	int _FlashReorgEntries(int minRequiredSpace);
