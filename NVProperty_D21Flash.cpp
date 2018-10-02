@@ -17,7 +17,6 @@
 #undef max
 #undef map
 #include <algorithm>    // std::max
-#include <bitset>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_D21Flash.h>
 #include <NVProperty.h>
@@ -402,18 +401,12 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 
 	int totalLen = 0;
 	int freeSpace = 0;
-	std::bitset<NVProperty::MAX_PROPERTIES> activeKeys;
-	
-	activeKeys.reset();
 	
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
 	while((uint8_t *)p < _endAddress && p->key != 0xff) {
-		if  (!activeKeys.test(p->key)) {
-			_flashEntry *k = _GetFlashEntry(p->key);
-			if (k) {
-				activeKeys.set(p->key);
-				totalLen += _GetFlashEntryLen(k);
-			}
+		_flashEntry *k = _GetFlashEntry(p->key);
+		if (k == p) { // current entry is the lastest one.
+			totalLen += _GetFlashEntryLen(k);
 		}
 		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
 	}
@@ -449,9 +442,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	
 	while((uint8_t *)p < _endAddress && p->key != 0xff) {
 		_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
-		if (k && k > p) {	// newer entry comes later, skip this version
-			;
-		} else {
+		if (k == p) {	// current entry is the lastest one.
 			if (!p->t.deleted) {
 				int plen = _GetFlashEntryLen(p);
 				memcpy(t, p, plen);
@@ -746,27 +737,22 @@ NVProperty_D21Flash::SetPropertyStr(int key, const char *value, int type)
 	if (type != NVProperty::T_STR)
 		return NVProperty::NVP_INVALD_PARM;
 	
-	const char *str = GetPropertyStr(key);
-	if (str && strcmp(value, str) == 0) {
-		free((void *)str);
+	_flashEntry *p = _GetFlashEntry(key);
+	if (p && p->t.type == NVProperty::T_STR && strcmp(p->data.v_str, value) == 0) {
 		return NVProperty::NVP_OK;
 	}
-	if (str)
-		free((void *)str);
 
 	int err = NVProperty::NVP_OK;
 	
-	_flashEntry *p = new _flashEntry[1];
+	p = new _flashEntry();
 	if (!p)
 		return NVProperty::NVP_ERR_NOSPACE;
-	memset(p, 0, sizeof(*p));
 	
 	p->key = key;
 	p->t.type = NVProperty::T_STR;
-	int cplen = std::min(strlen(value)+1, sizeof(p->data.v_str));
-	p->u.option.d_len = cplen;
+	int cplen = std::min(strlen(value), sizeof(p->data.v_str)-1);
 	memcpy(p->data.v_str, value, cplen);
-	p->data.v_str[MAX_DATA_ENTRY-1] = 0; // zero term.
+	p->u.option.d_len = cplen + 1; // zero term
 	
 	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
 	len += _GetFlashPaddingSize(len);
@@ -800,13 +786,12 @@ NVProperty_D21Flash::SetPropertyBlob(int key, const void *blob, int size, int ty
 	}
 	int err = NVProperty::NVP_OK;
 	
-	p = new _flashEntry[1];
+	p = new _flashEntry();
 	if (!p)
 		return NVProperty::NVP_ERR_NOSPACE;
-	memset(p, 0, sizeof(*p));
 	
 	p->key = key;
-	p->t.type = NVProperty::T_STR;
+	p->t.type = NVProperty::T_BLOB;
 	int cplen = std::min(size, (int)sizeof(p->data.v_blob));
 	p->u.option.d_len = cplen;
 	memcpy(p->data.v_blob, blob, cplen);
