@@ -36,8 +36,8 @@ public:
         T_16BIT	= 3,
         T_32BIT	= 4,
         T_64BIT	= 5,
-        T_STR	= 6,
-        T_BLOB	= 7,	/* blobs can be up to 255 bytes long */
+        T_STR	= 6,	// strings can be up to 256 bytes including zero
+        T_BLOB	= 7,	// blobs can be up to 256 bytes long
 		T_MAX	= 15	// we have only 4 bit space for the NVP types
     };
     
@@ -86,7 +86,7 @@ public:
      * SetProperty
      * It requires to use OpenPropertyStore and finally ClosePropertyStore(true)
      * to write out all properties.
-	 * Properties are being limited to 255 bytes. (e.g. 255 long strings or 255 bytes blobs)
+	 * Properties are being limited to 256 bytes. (e.g. 255 long strings or 256 bytes blobs)
      *
 	 * Number properties e.g. 0 or 1, or 123 are highly optimized in storage sizes
 	 * therefore the value is automatically being compressed to a bit or a little
