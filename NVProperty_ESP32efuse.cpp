@@ -92,7 +92,7 @@ NVProperty_ESP32efuse::GetProperty(int key)
 int64_t
 NVProperty_ESP32efuse::GetProperty64(int key)
 {
-    return NVProperty::NVP_ENOENT;
+    return this->GetProperty(key);
 }
 
 const char *
