@@ -1,6 +1,6 @@
 /*
  * This is an unpublished work copyright
- * (c) 2017 Helmut Tschemernjak
+ * (c) 2019 Helmut Tschemernjak
  * 30826 Garbsen (Hannover) Germany
  *
  *
@@ -10,8 +10,14 @@
  */
 
 #ifdef ARDUINO
-
 #include <Arduino.h>
+#elif __MBED__
+#include <mbed.h>
+#else
+#error "Unkown operating system"
+#endif
+
+
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_SRAM.h>
 #ifdef ARDUINO_ARCH_ESP32
@@ -19,6 +25,10 @@
   #include <NVProperty_ESP32efuse.h>
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
   #include <NVProperty_D21Flash.h>
+#elif defined(__MBED__) && defined(TARGET_STM32L4)
+  #include <mbed.h>
+  #include <NVProperty_L4OTP.h>
+  #include <NVProperty_L4Flash.h>
 #else
 #error "Unkown implementation"
 #endif
@@ -35,12 +45,16 @@ NVProperty::NVProperty(int propSizekB, bool erase)
     _flash = new NVProperty_ESP32NVS();
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
     _flash = new NVProperty_D21Flash(propSizekB, erase);
+#elif TARGET_STM32L4
+	// TODO _flash = new NVProperty_L4Flash(propSizekB, erase);
 #else
  #error "unkown platform"
 #endif
 
 #ifdef ARDUINO_ARCH_ESP32
     _otp = new NVProperty_ESP32efuse();
+#elif TARGET_STM32L4
+    _otp = new NVProperty_L4OTP();
 #endif
     _allowWrite = false;
     _didOpen = false;
@@ -48,8 +62,9 @@ NVProperty::NVProperty(int propSizekB, bool erase)
 
 NVProperty::~NVProperty()
 {
-    if (_ram)
+    if (_ram) {
     	delete _ram;
+	}
 	if (_flash)
         delete _flash;
     if (_otp)
@@ -227,8 +242,9 @@ NVProperty::SetProperty(int key, NVPType ptype,  const void *blob, int length, N
     if (!_didOpen)
         OpenPropertyStore();
 
-    if (!_allowWrite)
+    if (!_allowWrite) {
         return NVP_NO_PERM;
+	}
  	
   	if (store == S_RAM && _ram) {
         res = _ram->SetPropertyBlob(key, blob, length, ptype);
@@ -335,6 +351,5 @@ NVProperty::ClosePropertyStore(bool flush)
         _otp->ClosePropertyStore(flush);
     return res;
 }
-#endif
 
 
