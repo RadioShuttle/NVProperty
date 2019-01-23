@@ -259,7 +259,7 @@ bool
 NVProperty_D21Flash::_FlashIsCleared(uint8_t *address, int len)
 {
 	while (len > 0) {
-		if (*address++ != 0xff) {
+		if (*address++ != NVProperty::PROPERTIES_EOF) {
 			return false;
 		}
 		len--;
@@ -350,7 +350,7 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 
 	int index = 0;
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != 0xff) {
+	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
 
 		int64_t value = 0;
     	switch(p->t.type) {
@@ -395,7 +395,11 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 			dprintf("Dump[%.2d] Key: %d Type: %d len: %d", index, p->key, p->t.type, p->u.option.d_len);
 			dump("Blob",  p->data.v_str, p->u.option.d_len);
 		} else {
-			dprintf("Dump[%.2d] Key: %d Type: %d value: %ld (0x%x)", index, p->key, p->t.type, (int32_t)value, (int32_t)value);
+			if (p->t.type == NVProperty::T_64BIT) {
+				dprintf("Dump[%.2d] Key: %d Type: %d value: %lld (0x%llx)", index, p->key, p->t.type, value, value);
+			} else {
+				dprintf("Dump[%.2d] Key: %d Type: %d value: %ld (0x%x)", index, p->key, p->t.type, (int32_t)value, (unsigned int)value);
+			}
 		}
 		
 		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
@@ -447,7 +451,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	int freeSpace = 0;
 	
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != 0xff) {
+	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
 		_flashEntry *k = _GetFlashEntry(p->key);
 		if (k == p) { // current entry is the lastest one.
 			totalLen += _GetFlashEntryLen(k);
@@ -484,7 +488,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	memcpy(t, _startAddress, sizeof(_flash_header));
 	t += sizeof(_flash_header);
 	
-	while((uint8_t *)p < _endAddress && p->key != 0xff) {
+	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
 		_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
 		if (k == p) {	// current entry is the lastest one.
 			if (!p->t.deleted) {
@@ -527,113 +531,11 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 }
 
 
-#if 0
-int
-NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
-{
-
-	if (_debug) {
-		dprintf("_FlashReorgEntries: start");
-		// _DumpAllEntires();
-	}
-
-	int totalLen = 0;
-	int freeSpace = 0;
-	std::bitset<NVProperty::MAX_PROPERTIES> activeKeys;
-	std::bitset<NVProperty::MAX_PROPERTIES> copiedKeys;
-	
-	activeKeys.reset();
-	copiedKeys.reset();
-	
-	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != 0xff) {
-		if  (!activeKeys.test(p->key)) {
-			_flashEntry *k = _GetFlashEntry(p->key);
-			if (k) {
-				activeKeys.set(p->key);
-				totalLen += _GetFlashEntryLen(k);
-			}
-		}
-		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
-	}
-
-	if (_startAddress + sizeof(_flash_header) + totalLen + minRequiredSpace >= _endAddress)
-			return 0;
-	
-	freeSpace = _endAddress - (_startAddress + sizeof(_flash_header) + totalLen);
-	if (_debug)
-		dprintf("freeSpace: %d, totalLen: %d", freeSpace, totalLen);
-	
-	/*
-	 * Copy header
-	 * while (content {
-	 *	- scan until tmp page is full
-	 *	- write page
-	 * }
-	 * Erase remaining pages.
-	 *
-	 */
-	p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	uint8_t *saveddata = new uint8_t[_rowSize+sizeof(struct _flashEntry)];
-	if (!saveddata)
-		return 0;
-	uint8_t *t = saveddata;
-	int currentRow = (uint32_t)_startAddress / _rowSize;
-	int totalCopied = 0;
-	
-	t = saveddata;
-	memcpy(t, _startAddress, sizeof(_flash_header));
-	t += sizeof(_flash_header);
-	
-	while((uint8_t *)p < _endAddress && p->key != 0xff) {
-		if (activeKeys.test(p->key) && !copiedKeys.test(p->key)) { // write entry once
-			_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
-			int klen = _GetFlashEntryLen(k);
-			memcpy(t, k, klen);
-			t += klen;
-			totalCopied += klen;
-			copiedKeys.set(k->key);
-			if (t - saveddata >= _rowSize) { // copy page
-				_FlashEraseRow(currentRow);
-				_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, _rowSize);
-				int remainLen = (t - saveddata) - _rowSize;
-				if (remainLen) {
-					memcpy(saveddata, t - remainLen, remainLen);
-				}
-				t = saveddata + remainLen;
-			}
-		}
-		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
-	}
-
-	if (t > saveddata) { // copy remaining
-		_FlashEraseRow(currentRow);
-		_FlashWrite((uint8_t *)(currentRow++ * _rowSize), saveddata, t - saveddata);
-	}
-
-	while((uint32_t)0 + currentRow * _rowSize < (uint32_t)_endAddress) {
-		_FlashEraseRow(currentRow++);
-	}
-	delete[] saveddata;
-	_GetFlashEntry(0); // inits the _lastEntry record
-
-	if (_debug) {
-		dprintf("_FlashReorgEntries: end");
-		_DumpAllEntires();
-		delay(300);
-	}
-	
-	return _endAddress - _startAddress -  (sizeof(_flash_header) + totalCopied);
-}
-#endif
-
-
 int
 NVProperty_D21Flash::GetProperty(int key)
 {
     return GetProperty64(key);
 }
-
 
 
 int64_t
