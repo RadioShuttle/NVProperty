@@ -12,6 +12,7 @@
 #ifndef __NVPROPERTY_H__
 #define __NVPROPERTY_H__
 
+
 #ifndef UNUSED
  #define UNUSED(x) (void)(x)
 #endif
@@ -117,6 +118,7 @@ public:
 		RTC_AGING_CAL	= 1, // int8_t the RTC aging calibration value
 		ADC_VREF		= 2, // the adc refernce volatge in millivolt
 		HARDWARE_REV	= 3, // the hardware revision of the board
+		CPUID			= 4, // the internal CPU ID
         
 		LORA_DEVICE_ID	= 10, // uint32_t the LoRa device ID
 		LORA_CODE_ID	= 11, // uint32_t the Code for the RadioShuttle protocol
