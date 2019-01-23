@@ -17,10 +17,8 @@
 #undef min
 #undef max
 #undef map
-using namespace std;
-#include <map>
-#define map	std::map // map clashes with Arduino map()
 #endif
+#include <map>
 
 
 class NVProperty_SRAM : public NVPropertyProviderInterface {
@@ -51,7 +49,7 @@ private:
             char *str;
         };
     };
-    map<int, PropertyEntry> _props;
+    std::map<int, PropertyEntry> _props;
 };
 
 #endif // __NVSProperty_SRAM__

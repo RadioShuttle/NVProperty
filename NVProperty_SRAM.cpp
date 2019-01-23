@@ -23,7 +23,7 @@ NVProperty_SRAM::NVProperty_SRAM()
 
 NVProperty_SRAM::~NVProperty_SRAM()
 {
-    map<int, PropertyEntry>::iterator re;
+    std::map<int, PropertyEntry>::iterator re;
     for(re = _props.begin(); re != _props.end(); re++) {
         if (re->second.type == NVProperty::T_STR)
             free(re->second.str);
@@ -37,7 +37,7 @@ NVProperty_SRAM::~NVProperty_SRAM()
 int
 NVProperty_SRAM::GetProperty(int key)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         switch (it->second.type) {
             case NVProperty::T_STR:
@@ -57,7 +57,7 @@ NVProperty_SRAM::GetProperty(int key)
 int64_t
 NVProperty_SRAM::GetProperty64(int key)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         switch (it->second.type) {
             case NVProperty::T_STR:
@@ -76,7 +76,7 @@ NVProperty_SRAM::GetProperty64(int key)
 const char *
 NVProperty_SRAM::GetPropertyStr(int key)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         if (it->second.type == NVProperty::T_STR) {
             return (const char *)it->second.str;
@@ -92,7 +92,7 @@ NVProperty_SRAM::GetPropertyBlob(int key, const void *blob, int *size)
     if (!blob || *size <= 0)
         return NVProperty::NVP_INVALD_PARM;
     
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         switch (it->second.type) {
             case NVProperty::T_BLOB:
@@ -112,7 +112,7 @@ NVProperty_SRAM::GetPropertyBlob(int key, const void *blob, int *size)
 int
 NVProperty_SRAM::SetProperty(int key, int64_t value, int type)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         it->second.val32 = value;
         return 0;
@@ -138,7 +138,7 @@ NVProperty_SRAM::SetProperty(int key, int64_t value, int type)
 int
 NVProperty_SRAM::SetPropertyStr(int key, const char *str, int type)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         if (it->second.str)
             free(it->second.str);
@@ -162,7 +162,7 @@ NVProperty_SRAM::SetPropertyStr(int key, const char *str, int type)
 int
 NVProperty_SRAM::SetPropertyBlob(int key, const void *blob, int size, int type)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it != _props.end()) {
         if (it->second.data)
         	delete[] (char *)it->second.data;
@@ -188,7 +188,7 @@ NVProperty_SRAM::SetPropertyBlob(int key, const void *blob, int size, int type)
 int
 NVProperty_SRAM::EraseProperty(int key)
 {
-    map<int, PropertyEntry>::iterator it = _props.find(key);
+    std::map<int, PropertyEntry>::iterator it = _props.find(key);
     if(it == _props.end()) {
         return NVProperty::NVP_ENOENT;
     }
