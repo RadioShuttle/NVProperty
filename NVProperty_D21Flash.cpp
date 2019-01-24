@@ -626,7 +626,7 @@ NVProperty_D21Flash::SetProperty(int key, int64_t value, int type)
 		storeType = NVProperty::T_8BIT;
 	else if (value >= -32768 && value < 32768)
 		storeType = NVProperty::T_16BIT;
-	else if (value > -2147483647 && value < 2147483648)
+	else if (value > -2147483647LL && value < 2147483648LL)
 		storeType = NVProperty::T_32BIT;
 	else
 		storeType = NVProperty::T_64BIT;
