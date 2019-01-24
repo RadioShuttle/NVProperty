@@ -17,7 +17,30 @@
 #include <NVProperty_L4OTP.h>
 #include <NVProperty.h>
 
-#define OTP_TEST_IN_RAM // test OTP in RAM
+
+#if 0	// sample test code for a man app.
+	{
+	NVProperty p;
+	
+	p.OpenPropertyStore(true);
+	dprintf("OTP--1: %d", p.GetProperty(p.CPUID, -1));
+	p.SetProperty(p.CPUID, p.T_32BIT, 123, p.S_OTP);
+	dprintf("OTP123: %d", p.GetProperty(p.CPUID, 0));
+	p.SetProperty(p.CPUID, p.T_32BIT, 0x12345678, p.S_OTP);
+	dprintf("OTP0x12345678: %x", p.GetProperty(p.CPUID, 0));
+	p.EraseProperty(p.CPUID, p.S_OTP);
+	dprintf("OTP:-2 %d", p.GetProperty(p.CPUID, -2));
+	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
+	p.SetProperty(p.HOSTNAME, p.T_STR, "Wunstorf", p.S_OTP);
+	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
+	p.SetProperty(p.CPUID, p.T_32BIT, 9876, p.S_OTP);
+	dprintf("OTP9876: %d", p.GetProperty(p.CPUID, 0));
+	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
+	
+	}
+#endif
+
+// #define OTP_TEST_IN_RAM // test OTP in RAM
 
 
 NVProperty_L4OTP::NVProperty_L4OTP()
@@ -46,8 +69,12 @@ NVProperty_L4OTP::NVProperty_L4OTP()
 
 NVProperty_L4OTP::~NVProperty_L4OTP()
 {
+#ifdef OTP_TEST_IN_RAM
 	_debug = true;
 	_DumpAllEntires();
+	wait_ms(100);
+	dump("_startAddress", _startAddress, 100);
+#endif
 }
 
 
@@ -112,7 +139,7 @@ NVProperty_L4OTP::GetProperty64(int key)
 			{
 				int32_t v;
 				memcpy(&v, &p->data.v_32bit, sizeof(p->data.v_32bit));
-				value =v;
+				value = v;
 			}
 			break;
 		case NVProperty::T_64BIT:
@@ -162,7 +189,6 @@ NVProperty_L4OTP::SetProperty(int key, int64_t value, int type)
 	if (GetProperty64(key) == value) // no need to save it again.
 	    return NVProperty::NVP_OK;
 	
-	
 	memset(valbuf, 0, sizeof(valbuf));
 	
 	if (value == 0 ||  value == 1)
@@ -171,7 +197,7 @@ NVProperty_L4OTP::SetProperty(int key, int64_t value, int type)
 		storeType = NVProperty::T_8BIT;
 	else if (value >= -32768 && value < 32768)
 		storeType = NVProperty::T_16BIT;
-	else if (value > -2147483647 && value < 2147483648)
+	else if (value > -2147483647LL && value < 2147483648LL)
 		storeType = NVProperty::T_32BIT;
 	else
 		storeType = NVProperty::T_64BIT;
@@ -493,26 +519,10 @@ NVProperty_L4OTP::_FlashReorgEntries(int minRequiredSpace)
 void
 NVProperty_L4OTP::_OTPWrite(uint8_t *address, const void *d, size_t length)
 {
-	//FlashIAP f;
-	//f.init();
 #ifdef OTP_TEST_IN_RAM
 	memcpy(address, d, length);
 #else
-	uint8_t *data = (uint8_t *)d;
-	uint32_t addr = (uint32_t)address;
-	volatile uint64_t data64;
-
-	HAL_FLASH_Unlock();
-	while (length > 0) {
-		for (uint8_t i = 0; i < 8; i++) {
-			*(((uint8_t *) &data64) + i) = *(data + i);
-        }
-	    int err = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, addr, data64);
-		addr += 8;
-		data += 8;
-		length -= 8;
-	}
-    HAL_FLASH_Lock();
+	OTPWrite(address, d, length);
 #endif
 }
 
