@@ -13,6 +13,8 @@
 
 #include <mbed.h>
 #include "main.h"
+#include "arch.h"
+#include <algorithm>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_L4OTP.h>
 #include <NVProperty.h>

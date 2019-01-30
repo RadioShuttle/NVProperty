@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include "arch.h"
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty.h>
 #include <NVProperty_SRAM.h>
