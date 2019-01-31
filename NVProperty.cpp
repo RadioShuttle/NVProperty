@@ -27,7 +27,7 @@
   #include <NVProperty_D21Flash.h>
 #elif __MBED__
   #include <mbed.h>
-  #include <NVProperty_L4Flash.h>
+  #include <NVProperty_MBEDFlash.h>
   #ifdef TARGET_STM32L4
     #include <NVProperty_L4OTP.h>
   #endif
@@ -48,7 +48,7 @@ NVProperty::NVProperty(int propSizekB, bool erase)
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
     _flash = new NVProperty_D21Flash(propSizekB, erase);
 #elif __MBED__
-	_flash = new NVProperty_L4Flash(propSizekB, erase);
+	_flash = new NVProperty_MBEDFlash(propSizekB, erase);
 #else
  #error "unkown platform"
 #endif

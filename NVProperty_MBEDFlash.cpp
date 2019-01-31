@@ -9,14 +9,14 @@
  * Details see: www.radioshuttle.de
  */
 
-#ifdef TARGET_STM32L4
+#ifdef __MBED__
 
 #include <mbed.h>
 #include "main.h"
 #include "arch.h"
 #include <algorithm>
 #include <NVPropertyProviderInterface.h>
-#include <NVProperty_L4Flash.h>
+#include <NVProperty_MBEDFlash.h>
 #include <NVProperty.h>
 
 
@@ -44,7 +44,7 @@
 
 
 
-NVProperty_L4Flash::NVProperty_L4Flash(int propSizekB, bool erase)
+NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 {
 	_flashIAP = new FlashIAP();
 	_flashIAP->init();
@@ -72,7 +72,7 @@ NVProperty_L4Flash::NVProperty_L4Flash(int propSizekB, bool erase)
 }
 
 
-NVProperty_L4Flash::~NVProperty_L4Flash()
+NVProperty_MBEDFlash::~NVProperty_MBEDFlash()
 {
 	_flashIAP->deinit();
 	delete _flashIAP;
@@ -84,7 +84,7 @@ NVProperty_L4Flash::~NVProperty_L4Flash()
 
 
 void
-NVProperty_L4Flash::_FlashInititalize(bool force)
+NVProperty_MBEDFlash::_FlashInititalize(bool force)
 {
 	_flash_header *fh = (_flash_header *)_startAddress;
 	if (fh->magic == FLASH_PROP_MAGIC && fh->version == FLASH_PROP_VERSION && fh->sizeKB == _propSizekB) {
@@ -111,7 +111,7 @@ NVProperty_L4Flash::_FlashInititalize(bool force)
 
 
 void
-NVProperty_L4Flash::_FlashEraseRow(int startRow, int count)
+NVProperty_MBEDFlash::_FlashEraseRow(int startRow, int count)
 {
 	// dprintf("_FlashEraseRow: startRow=%d, count=%d", startRow, count);
 	
@@ -141,7 +141,7 @@ NVProperty_L4Flash::_FlashEraseRow(int startRow, int count)
  * Check if the page contins FF's than write, otherwise erase first
  */
 void
-NVProperty_L4Flash::_FlashWrite(uint8_t *address, const void *d, size_t length)
+NVProperty_MBEDFlash::_FlashWrite(uint8_t *address, const void *d, size_t length)
 {
 	uint8_t *data = (uint8_t *)d;
 	
@@ -195,7 +195,7 @@ NVProperty_L4Flash::_FlashWrite(uint8_t *address, const void *d, size_t length)
 
 
 bool
-NVProperty_L4Flash::_FlashIsCleared(uint8_t *address, int len)
+NVProperty_MBEDFlash::_FlashIsCleared(uint8_t *address, int len)
 {
 	while (len > 0) {
 		if (*address++ != NVProperty::PROPERTIES_EOF) {
@@ -208,7 +208,7 @@ NVProperty_L4Flash::_FlashIsCleared(uint8_t *address, int len)
 
 
 void
-NVProperty_L4Flash::_FlashWritePage(int page, int offset, uint8_t *data, int length)
+NVProperty_MBEDFlash::_FlashWritePage(int page, int offset, uint8_t *data, int length)
 {
 	uint8_t *addr = (uint8_t *)(page * _pageSize) + offset;
 	if (length < 1)
@@ -220,14 +220,14 @@ NVProperty_L4Flash::_FlashWritePage(int page, int offset, uint8_t *data, int len
 
 
 int
-NVProperty_L4Flash::GetProperty(int key)
+NVProperty_MBEDFlash::GetProperty(int key)
 {
     return GetProperty64(key);
 }
 
 
 int64_t
-NVProperty_L4Flash::GetProperty64(int key)
+NVProperty_MBEDFlash::GetProperty64(int key)
 {
 	_flashEntry *p = _GetFlashEntry(key);
 	if (!p)
@@ -271,7 +271,7 @@ NVProperty_L4Flash::GetProperty64(int key)
 }
 
 const char *
-NVProperty_L4Flash::GetPropertyStr(int key)
+NVProperty_MBEDFlash::GetPropertyStr(int key)
 {
 	_flashEntry *p = _GetFlashEntry(key);
 	if (!p || p->t.type != NVProperty::T_STR)
@@ -280,7 +280,7 @@ NVProperty_L4Flash::GetPropertyStr(int key)
 }
 
 int
-NVProperty_L4Flash::GetPropertyBlob(int key, const void *blob, int *size)
+NVProperty_MBEDFlash::GetPropertyBlob(int key, const void *blob, int *size)
 {
 	_flashEntry *p = _GetFlashEntry(key);
 	if (!p || p->t.type != NVProperty::T_BLOB)
@@ -296,7 +296,7 @@ NVProperty_L4Flash::GetPropertyBlob(int key, const void *blob, int *size)
 
 
 int
-NVProperty_L4Flash::SetProperty(int key, int64_t value, int type)
+NVProperty_MBEDFlash::SetProperty(int key, int64_t value, int type)
 {
 	UNUSED(type);
 	uint8_t valbuf[FLASH_ENTRY_MIN_SIZE + sizeof(int64_t)];
@@ -366,7 +366,7 @@ NVProperty_L4Flash::SetProperty(int key, int64_t value, int type)
 
 
 int
-NVProperty_L4Flash::SetPropertyStr(int key, const char *value, int type)
+NVProperty_MBEDFlash::SetPropertyStr(int key, const char *value, int type)
 {
 	if (type != NVProperty::T_STR)
 		return NVProperty::NVP_INVALD_PARM;
@@ -408,7 +408,7 @@ done:
 }
 
 int
-NVProperty_L4Flash::SetPropertyBlob(int key, const void *blob, int size, int type)
+NVProperty_MBEDFlash::SetPropertyBlob(int key, const void *blob, int size, int type)
 {
 	if (type != NVProperty::T_BLOB)
 		return NVProperty::NVP_INVALD_PARM;
@@ -450,7 +450,7 @@ done:
 }
 
 int
-NVProperty_L4Flash::EraseProperty(int key)
+NVProperty_MBEDFlash::EraseProperty(int key)
 {
 	uint8_t valbuf[FLASH_ENTRY_MIN_SIZE];
 	_flashEntry *p = (_flashEntry *) valbuf;
@@ -479,7 +479,7 @@ NVProperty_L4Flash::EraseProperty(int key)
 }
 
 int
-NVProperty_L4Flash::ReorgProperties(void)
+NVProperty_MBEDFlash::ReorgProperties(void)
 {
 	if (_FlashReorgEntries(FLASH_ENTRY_MIN_SIZE))
     	return NVProperty::NVP_OK;
@@ -488,21 +488,21 @@ NVProperty_L4Flash::ReorgProperties(void)
 
 
 int
-NVProperty_L4Flash::OpenPropertyStore(bool forWrite)
+NVProperty_MBEDFlash::OpenPropertyStore(bool forWrite)
 {
 	UNUSED(forWrite);
     return NVProperty::NVP_OK;
 }
 
 int
-NVProperty_L4Flash::ClosePropertyStore(bool flush)
+NVProperty_MBEDFlash::ClosePropertyStore(bool flush)
 {
     return NVProperty::NVP_OK;
 }
 
 #if 1
 void
-NVProperty_L4Flash::_DumpAllEntires(void)
+NVProperty_MBEDFlash::_DumpAllEntires(void)
 {
 	if (!_debug)
 		return;
@@ -571,8 +571,8 @@ NVProperty_L4Flash::_DumpAllEntires(void)
 }
 #endif
 
-NVProperty_L4Flash::_flashEntry *
-NVProperty_L4Flash::_GetFlashEntry(int key, uint8_t *start)
+NVProperty_MBEDFlash::_flashEntry *
+NVProperty_MBEDFlash::_GetFlashEntry(int key, uint8_t *start)
 {
 	_flashEntry *p;
 
@@ -599,7 +599,7 @@ NVProperty_L4Flash::_GetFlashEntry(int key, uint8_t *start)
 
 
 int
-NVProperty_L4Flash::_GetFlashEntryLen(_flashEntry *p)
+NVProperty_MBEDFlash::_GetFlashEntryLen(_flashEntry *p)
 {
 	int len = 0;
 	
@@ -617,7 +617,7 @@ NVProperty_L4Flash::_GetFlashEntryLen(_flashEntry *p)
 }
 
 int
-NVProperty_L4Flash::_GetFlashPaddingSize(int len)
+NVProperty_MBEDFlash::_GetFlashPaddingSize(int len)
 {
 	int remain = len % FLASH_PADDING_SIZE;
 	
@@ -629,7 +629,7 @@ NVProperty_L4Flash::_GetFlashPaddingSize(int len)
 
 
 int
-NVProperty_L4Flash::_FlashReorgEntries(int minRequiredSpace)
+NVProperty_MBEDFlash::_FlashReorgEntries(int minRequiredSpace)
 {
 	if (_debug) {
 		dprintf("_FlashReorgEntries: start");
@@ -719,4 +719,4 @@ NVProperty_L4Flash::_FlashReorgEntries(int minRequiredSpace)
 }
 
 
-#endif // TARGET_STM32L4
+#endif // __MBED__

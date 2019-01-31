@@ -9,13 +9,13 @@
  * Details see: www.radioshuttle.de
  */
 
-#ifndef __NVPROPERTY_L4FLASH__
-#define __NVPROPERTY_L4FLASH__
+#ifndef __NVPROPERTY_MBEDFLASH__
+#define __NVPROPERTY_MBEDFLASH__
 
-class NVProperty_L4Flash : public NVPropertyProviderInterface {
+class NVProperty_MBEDFlash : public NVPropertyProviderInterface {
 public:
-	NVProperty_L4Flash(int propSizekB, bool erase);
-	~NVProperty_L4Flash();
+	NVProperty_MBEDFlash(int propSizekB, bool erase);
+	~NVProperty_MBEDFlash();
 	
     virtual int GetProperty(int key);
     virtual int64_t GetProperty64(int key);
@@ -94,4 +94,4 @@ private:
 
 };
 
-#endif // __NVPROPERTY_L4FLASH__
+#endif // __NVPROPERTY_MBEDLASH__
