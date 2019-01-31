@@ -25,10 +25,12 @@
   #include <NVProperty_ESP32efuse.h>
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
   #include <NVProperty_D21Flash.h>
-#elif defined(__MBED__) && defined(TARGET_STM32L4)
+#elif __MBED__
   #include <mbed.h>
-  #include <NVProperty_L4OTP.h>
   #include <NVProperty_L4Flash.h>
+  #ifdef TARGET_STM32L4
+    #include <NVProperty_L4OTP.h>
+  #endif
 #else
 #error "Unkown implementation"
 #endif
@@ -45,8 +47,8 @@ NVProperty::NVProperty(int propSizekB, bool erase)
     _flash = new NVProperty_ESP32NVS();
 #elif defined(ARDUINO_SAMD_ZERO) || defined(ARDUINO_ARCH_SAMD)
     _flash = new NVProperty_D21Flash(propSizekB, erase);
-#elif TARGET_STM32L4
-	// TODO _flash = new NVProperty_L4Flash(propSizekB, erase);
+#elif __MBED__
+	_flash = new NVProperty_L4Flash(propSizekB, erase);
 #else
  #error "unkown platform"
 #endif
