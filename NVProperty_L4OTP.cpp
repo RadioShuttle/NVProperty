@@ -20,7 +20,7 @@
 #include <NVProperty.h>
 
 
-#if 0	// sample test code for a man app.
+#if 0	// sample test code for a main app.
 	{
 	NVProperty p;
 	
