@@ -45,7 +45,7 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	_flashIAP->init();
 	
 	// at present erased flash bits are assumed with 0xff value
-	MBED_ASSERT(_flashIAP->get_erase_value() == NVProperty::PROPERTIES_EOF);
+	// MBED_ASSERT(_flashIAP->get_erase_value() == NVProperty::PROPERTIES_EOF);
 	// a min page size > 8 looks strange
 	MBED_ASSERT(_flashIAP->get_page_size() <= sizeof(int64_t));
 	
