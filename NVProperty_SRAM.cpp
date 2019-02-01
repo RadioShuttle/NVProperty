@@ -43,10 +43,8 @@ NVProperty_SRAM::GetProperty(int key)
         switch (it->second.type) {
             case NVProperty::T_STR:
                 return NVProperty::NVP_ENOENT;
-    	        break;
             case NVProperty::T_BLOB:
                 return NVProperty::NVP_ENOENT;
-                break;
             default:
                 return it->second.val32;
         }
@@ -63,10 +61,8 @@ NVProperty_SRAM::GetProperty64(int key)
         switch (it->second.type) {
             case NVProperty::T_STR:
                 return NVProperty::NVP_ENOENT;
-                break;
             case NVProperty::T_BLOB:
                 return NVProperty::NVP_ENOENT;
-                break;
             default:
                 return it->second.val64;
         }
@@ -101,7 +97,6 @@ NVProperty_SRAM::GetPropertyBlob(int key, const void *blob, int *size)
 				if (blob)
                 	memcpy((void *)blob, it->second.data, *size);
                 return *size;
-                break;
             default:
                 break;
         }
