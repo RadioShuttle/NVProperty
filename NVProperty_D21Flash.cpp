@@ -258,11 +258,10 @@ NVProperty_D21Flash::_FlashWrite(uint8_t *address, const void *d, size_t length)
 bool
 NVProperty_D21Flash::_FlashIsCleared(uint8_t *address, int len)
 {
-	while (len > 0) {
+	while (len-- > 0) {
 		if (*address++ != NVProperty::PROPERTIES_EOF) {
 			return false;
 		}
-		len--;
 	}
 	return true;
 }
