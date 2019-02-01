@@ -20,25 +20,20 @@
 #include <NVProperty.h>
 
 
-#if 0	// sample test code for a man app.
+#if 0	// sample test code for a main app.
 	{
-	NVProperty p;
-	
-	p.OpenPropertyStore(true);
-	dprintf("OTP--1: %d", p.GetProperty(p.CPUID, -1));
-	p.SetProperty(p.CPUID, p.T_32BIT, 123, p.S_OTP);
-	dprintf("OTP123: %d", p.GetProperty(p.CPUID, 0));
-	p.SetProperty(p.CPUID, p.T_32BIT, 0x12345678, p.S_OTP);
-	dprintf("OTP0x12345678: %x", p.GetProperty(p.CPUID, 0));
-	p.EraseProperty(p.CPUID, p.S_OTP);
-	dprintf("OTP:-2 %d", p.GetProperty(p.CPUID, -2));
-	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
-	p.SetProperty(p.HOSTNAME, p.T_STR, "Wunstorf", p.S_OTP);
-	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
-	p.SetProperty(p.CPUID, p.T_32BIT, 9876, p.S_OTP);
-	dprintf("OTP9876: %d", p.GetProperty(p.CPUID, 0));
-	dprintf("OTP: Host %s", p.GetProperty(p.HOSTNAME, "MyHost"));
-	
+		NVProperty p;
+		p.OpenPropertyStore(true);
+		
+		dprintf("LORA_REMOTE_ID: %d", p.GetProperty(p.LORA_REMOTE_ID, 0));
+		p.SetProperty(p.LORA_REMOTE_ID, p.T_32BIT, 123);
+		dprintf("LORA_REMOTE_ID: %d", p.GetProperty(p.LORA_REMOTE_ID, 0));
+		dprintf("Host: %s", p.GetProperty(p.HOSTNAME, "MyHost"));
+		p.SetProperty(p.HOSTNAME, p.T_STR, "Wunstorf", p.S_FLASH);
+		dprintf("Host: %s", p.GetProperty(p.HOSTNAME, "MyHost"));
+		p.SetProperty(p.LORA_REMOTE_ID, p.T_32BIT, 456);
+		dprintf("LORA_REMOTE_ID: %d", p.GetProperty(p.LORA_REMOTE_ID, 0));
+		dprintf("Host: %s", p.GetProperty(p.HOSTNAME, "MyHost"));
 	}
 #endif
 
@@ -49,6 +44,12 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	_flashIAP = new FlashIAP();
 	_flashIAP->init();
 	
+	// at present erased flash bits are assumed with 0xff value
+	MBED_ASSERT(_flashIAP->get_erase_value() == NVProperty::PROPERTIES_EOF);
+	// a min page size > 8 looks strange
+	MBED_ASSERT(_flashIAP->get_page_size() <= sizeof(int64_t));
+	
+
 	_debug = false;
 	_propSizekB = propSizekB;
 	_pageSize = _flashIAP->get_page_size();
@@ -76,10 +77,14 @@ NVProperty_MBEDFlash::~NVProperty_MBEDFlash()
 {
 	_flashIAP->deinit();
 	delete _flashIAP;
+#if 0
 	_debug = true;
 	wait_ms(100);
 	_DumpAllEntires();
 	wait_ms(100);
+	dump("buffer: ", _startAddress, 100);
+	wait_ms(100);
+#endif
 }
 
 
@@ -197,11 +202,10 @@ NVProperty_MBEDFlash::_FlashWrite(uint8_t *address, const void *d, size_t length
 bool
 NVProperty_MBEDFlash::_FlashIsCleared(uint8_t *address, int len)
 {
-	while (len > 0) {
+	while (len-- > 0) {
 		if (*address++ != NVProperty::PROPERTIES_EOF) {
 			return false;
 		}
-		len--;
 	}
 	return true;
 }
@@ -299,7 +303,7 @@ int
 NVProperty_MBEDFlash::SetProperty(int key, int64_t value, int type)
 {
 	UNUSED(type);
-	uint8_t valbuf[FLASH_ENTRY_MIN_SIZE + sizeof(int64_t)];
+	uint8_t valbuf[16];
 	_flashEntry *p = (_flashEntry *) valbuf;
 	int storeType;
 	
@@ -346,12 +350,13 @@ NVProperty_MBEDFlash::SetProperty(int key, int64_t value, int type)
 			break;
 	}
 	int len;
-	if (storeType == NVProperty::T_BIT || storeType == NVProperty::T_8BIT || storeType == NVProperty::T_16BIT || storeType == NVProperty::T_32BIT) {
-		len = FLASH_ENTRY_MIN_SIZE;
-	} else { // 64/STR/BLOB
-		len = (FLASH_ENTRY_MIN_SIZE - 4) + p->u.option.d_len;
-		len += _GetFlashPaddingSize(len);
-	}
+	if (storeType == NVProperty::T_BIT)
+		len = FLASH_ENTRY_HEADER_SHORT;
+	else if (storeType == NVProperty::T_8BIT || storeType == NVProperty::T_16BIT)
+		len = FLASH_ENTRY_HEADER;
+	else // 32/64/STR/BLOB
+		len = FLASH_ENTRY_HEADER + p->u.option.d_len;
+	len += _GetFlashPaddingSize(len);
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
 		if (!_FlashReorgEntries(len))
 			return NVProperty::NVP_ERR_NOSPACE;
@@ -388,7 +393,7 @@ NVProperty_MBEDFlash::SetPropertyStr(int key, const char *value, int type)
 	memcpy(p->data.v_str, value, cplen);
 	p->u.option.d_len = cplen + 1; // zero term
 	
-	int len = (FLASH_ENTRY_MIN_SIZE - 4) + p->u.option.d_len;
+	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
 	len += _GetFlashPaddingSize(len);
 
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
@@ -430,7 +435,7 @@ NVProperty_MBEDFlash::SetPropertyBlob(int key, const void *blob, int size, int t
 	p->u.option.d_len = cplen;
 	memcpy(p->data.v_blob, blob, cplen);
 	
-	int len = (FLASH_ENTRY_MIN_SIZE - 4) + p->u.option.d_len;
+	int len = FLASH_ENTRY_HEADER + p->u.option.d_len;
 	len += _GetFlashPaddingSize(len);
 
 	if ((uint8_t *)_lastEntry + len >= _endAddress) {
@@ -452,7 +457,7 @@ done:
 int
 NVProperty_MBEDFlash::EraseProperty(int key)
 {
-	uint8_t valbuf[FLASH_ENTRY_MIN_SIZE];
+	uint8_t valbuf[16];
 	_flashEntry *p = (_flashEntry *) valbuf;
 
 	_flashEntry *op = _GetFlashEntry(key);
@@ -466,13 +471,16 @@ NVProperty_MBEDFlash::EraseProperty(int key)
 	p->t.type = op->t.type;
 	p->t.deleted = true;
 	
-	if ((uint8_t *)_lastEntry + FLASH_ENTRY_MIN_SIZE > _endAddress) {
-		if (!_FlashReorgEntries(FLASH_ENTRY_MIN_SIZE))
-			return NVProperty::NVP_ERR_NOSPACE;
+	int len = FLASH_ENTRY_HEADER_SHORT;
+	len += _GetFlashPaddingSize(len);
+	
+	if ((uint8_t *)_lastEntry + len > _endAddress) {
+			if (!_FlashReorgEntries(len))
+				return NVProperty::NVP_ERR_NOSPACE;
 	}
 
-	_FlashWrite((uint8_t *)_lastEntry, p, FLASH_ENTRY_MIN_SIZE);
-	_lastEntry = (_flashEntry *)((uint8_t *)_lastEntry + FLASH_ENTRY_MIN_SIZE);
+	_FlashWrite((uint8_t *)_lastEntry, p, len);
+	_lastEntry = (_flashEntry *)((uint8_t *)_lastEntry + len);
 
 	// _DumpAllEntires();
 	return NVProperty::NVP_OK;
@@ -481,7 +489,7 @@ NVProperty_MBEDFlash::EraseProperty(int key)
 int
 NVProperty_MBEDFlash::ReorgProperties(void)
 {
-	if (_FlashReorgEntries(FLASH_ENTRY_MIN_SIZE))
+	if (_FlashReorgEntries(FLASH_ENTRY_HEADER))
     	return NVProperty::NVP_OK;
 	return NVProperty::NVP_ERR_NOSPACE;
 }
@@ -603,28 +611,27 @@ NVProperty_MBEDFlash::_GetFlashEntryLen(_flashEntry *p)
 {
 	int len = 0;
 	
-	switch(p->t.type) {
-		case NVProperty::T_64BIT:
-		case NVProperty::T_STR:
-		case NVProperty::T_BLOB:
-			len = (FLASH_ENTRY_MIN_SIZE - 4) + p->u.option.d_len;
-			len += _GetFlashPaddingSize(len);
-			break;
-		default:
-			len = FLASH_ENTRY_MIN_SIZE;
-	}
+	if (p->t.type == NVProperty::T_BIT || p->t.deleted)
+		len = FLASH_ENTRY_HEADER_SHORT;
+	else if (p->t.type == NVProperty::T_8BIT || p->t.type == NVProperty::T_16BIT)
+		len = FLASH_ENTRY_HEADER;
+	else
+		len = FLASH_ENTRY_HEADER + p->u.option.d_len;
+		
+	len += _GetFlashPaddingSize(len);
+
 	return len;
 }
 
 int
 NVProperty_MBEDFlash::_GetFlashPaddingSize(int len)
 {
-	int remain = len % FLASH_PADDING_SIZE;
+	int remain = len % _pageSize;
 	
 	if (remain == 0)
 		return 0;
 	
-	return (len + FLASH_PADDING_SIZE - remain) - len;
+	return (len + _pageSize - remain) - len;
 }
 
 

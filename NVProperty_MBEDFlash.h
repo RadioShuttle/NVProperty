@@ -42,9 +42,12 @@ private:
 		uint16_t sizeKB;
 	};
 	
-	static const int FLASH_ENTRY_MIN_SIZE		= 8;
-	static const int MAX_DATA_ENTRY				= 256-FLASH_ENTRY_MIN_SIZE;
-	static const int FLASH_PADDING_SIZE			= 8; // writes sizes and alignment must be multiple of 64-bit,
+	static const int FLASH_ENTRY_HEADER			= 4;
+	static const int FLASH_ENTRY_HEADER_SHORT	= 2;
+	static const int MAX_DATA_ENTRY				= 256;
+
+// static const int FLASH_ENTRY_MIN_SIZE		= 8;
+// static const int FLASH_PADDING_SIZE			= 8; // writes sizes and alignment must be multiple of 64-bit,
 	
 	struct _flashEntry {
 		uint8_t key;	// Property key
@@ -86,8 +89,8 @@ private:
 	uint8_t *_startAddress;
 	uint8_t *_endAddress;
 
-	static const int FLASH_PROP_MAGIC = 0x4c6f5261; // "LORA"
-	static const int FLASH_PROP_VERSION = 3;
+	static const int FLASH_PROP_MAGIC = 0x4e564d42; // "NVMB"
+	static const int FLASH_PROP_VERSION = 1;
 };
 
 #endif // __NVPROPERTY_MBEDLASH__
