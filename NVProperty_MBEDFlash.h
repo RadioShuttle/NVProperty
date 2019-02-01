@@ -45,9 +45,6 @@ private:
 	static const int FLASH_ENTRY_HEADER			= 4;
 	static const int FLASH_ENTRY_HEADER_SHORT	= 2;
 	static const int MAX_DATA_ENTRY				= 256;
-
-// static const int FLASH_ENTRY_MIN_SIZE		= 8;
-// static const int FLASH_PADDING_SIZE			= 8; // writes sizes and alignment must be multiple of 64-bit,
 	
 	struct _flashEntry {
 		uint8_t key;	// Property key
