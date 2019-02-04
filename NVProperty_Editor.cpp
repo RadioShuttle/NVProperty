@@ -156,7 +156,7 @@ void NVPropertyEditor(void)
 			}
 			break;
 			case 's': {
-				char *v = strchr(++cmd, '=');
+				char *v = (char *)strchr(++cmd, '=');
 				if (!v)
 					continue;
 				*v++ = 0;
