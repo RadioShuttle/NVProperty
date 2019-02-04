@@ -70,6 +70,7 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	}
 	
 	_FlashInititalize(erase);
+	_GetFlashEntry(0); // inits the _lastEntry record
 }
 
 

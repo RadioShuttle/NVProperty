@@ -66,6 +66,7 @@ NVProperty_L4OTP::NVProperty_L4OTP()
 	_lastEntry = NULL;
 	
 	_FlashInititalize();
+	_GetFlashEntry(0); // inits the _lastEntry record
 }
 
 
