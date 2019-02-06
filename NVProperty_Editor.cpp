@@ -94,7 +94,8 @@ void NVPropertyEditor(void)
 	NVProperty p;
 	
 	rprintf("\nWelcome to the Property Editor which allows reading/writing/erasing non volatile settings\r\n\r\n");
-  	rprintf("Properties cmds are:  l (list properties), s (set e.g. s20=value), d (delete e.g. d20), q (quit)\r\n");
+	const char *help = "Properties cmds are:\r\n l (list properties), s (set e.g. s20=value), d (delete e.g. d20), q (quit)\r\n";
+	rprintf(help);
 	
 	while(true) {
 		char buf[80];
@@ -188,9 +189,17 @@ void NVPropertyEditor(void)
 				}
 			}
 			break;
+			case 'i':
+				dump("Flash-Area", (void *)0x803c000, 2048);
+			break;
+			case 'r':
+				dprintf("ReorgProperties");
+				p.ReorgProperties();
+				break;
 			case 'q':
 				return;
 			default:
+				rprintf(help);
 				break;
 		}
 	}
