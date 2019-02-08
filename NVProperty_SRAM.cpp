@@ -12,7 +12,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#ifndef ARDUINO
 #include "arch.h"
+#endif
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty.h>
 #include <NVProperty_SRAM.h>
