@@ -55,7 +55,7 @@ NVProperty_L4OTP::NVProperty_L4OTP()
 	static uint8_t *savedStart;
 	if (!savedStart) {
  		_startAddress = (uint8_t *) malloc(512);
-		memset(_startAddress, 0xff, 512);
+		memset(_startAddress, _flashErasedValue, 512);
 		savedStart = _startAddress;
 	} else {
 		_startAddress = savedStart;
@@ -91,7 +91,7 @@ NVProperty_L4OTP::_FlashInititalize(void)
 	
 	uint8_t *p = _startAddress;
 	for (int i = 0; i < (int)sizeof(_flash_header); i++) {
-		if (*p++ != 0xff)
+		if (*p++ != _flashErasedValue)
 			return; // invalid data
 	}
 	
@@ -395,7 +395,7 @@ NVProperty_L4OTP::_DumpAllEntires(void)
 
 	int index = 0;
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 
 		int64_t value = 0;
     	switch(p->t.type) {
@@ -466,7 +466,7 @@ NVProperty_L4OTP::_GetFlashEntry(int key, uint8_t *start)
 		p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
 	_flashEntry *lastP = NULL;
 	while(true) {
-		if ((uint8_t*)p >= _endAddress || p->key == NVProperty::PROPERTIES_EOF) {
+		if ((uint8_t*)p >= _endAddress || p->key == _flashErasedValue) {
 			if ((uint8_t*)p <= _endAddress)
 				_lastEntry = p;
 			if (!lastP || lastP->t.deleted)

@@ -80,6 +80,7 @@ private:
 	bool _debug;
 	int _propSize;
 
+	static const uint8_t _flashErasedValue = 0xff;
 	static const int FLASH_PROP_MAGIC = 0x4c4f5450; // "LOTP"
 	static const int FLASH_PROP_VERSION = 1;
 };
