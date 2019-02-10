@@ -87,6 +87,7 @@ private:
 
 	static const int FLASH_PROP_MAGIC = 0x4c6f5261; // "LORA"
 	static const int FLASH_PROP_VERSION = 3;
+	static const uint8_t _flashErasedValue = 0xff;
 	static const int _bootlLoaderSize = 8192;
 	static const int _lockRegions = 16;	// d21 lock regions are always 16 for the entire ram
 

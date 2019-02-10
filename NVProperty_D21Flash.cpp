@@ -259,7 +259,7 @@ bool
 NVProperty_D21Flash::_FlashIsCleared(uint8_t *address, int len)
 {
 	while (len-- > 0) {
-		if (*address++ != NVProperty::PROPERTIES_EOF) {
+		if (*address++ != _flashErasedValue) {
 			return false;
 		}
 	}
@@ -324,7 +324,7 @@ NVProperty_D21Flash::_GetFlashEntry(int key, uint8_t *start)
 		p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
 	_flashEntry *lastP = NULL;
 	while(true) {
-		if ((uint8_t*)p >= _endAddress || p->key == NVProperty::PROPERTIES_EOF) {
+		if ((uint8_t*)p >= _endAddress || p->key == _flashErasedValue) {
 			if ((uint8_t*)p <= _endAddress)
 				_lastEntry = p;
 			if (!lastP || lastP->t.deleted)
@@ -349,7 +349,7 @@ NVProperty_D21Flash::_DumpAllEntires(void)
 
 	int index = 0;
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 
 		int64_t value = 0;
     	switch(p->t.type) {
@@ -450,7 +450,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	int freeSpace = 0;
 	
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 		_flashEntry *k = _GetFlashEntry(p->key);
 		if (k == p) { // current entry is the lastest one.
 			totalLen += _GetFlashEntryLen(k);
@@ -487,7 +487,7 @@ NVProperty_D21Flash::_FlashReorgEntries(int minRequiredSpace)
 	memcpy(t, _startAddress, sizeof(_flash_header));
 	t += sizeof(_flash_header);
 	
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 		_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
 		if (k == p) {	// current entry is the lastest one.
 			if (!p->t.deleted) {
