@@ -44,8 +44,6 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	_flashIAP = new FlashIAP();
 	_flashIAP->init();
 	
-	// at present erased flash bits are assumed with 0xff value
-	// MBED_ASSERT(_flashIAP->get_erase_value() == NVProperty::PROPERTIES_EOF);
 	// a min page size > 8 looks strange
 	MBED_ASSERT(_flashIAP->get_page_size() <= sizeof(int64_t));
 	
@@ -57,6 +55,7 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	_rowSize = _flashIAP->get_sector_size(_flashIAP->get_flash_start()); //  pageSize * 4;
 	_startAddress = (uint8_t*)_flashIAP->get_flash_start() + ((_numPages-(_propSizekB * 1024)/_pageSize) * _pageSize);
 	_endAddress = _startAddress + (_propSizekB * 1024);
+	_flashErasedValue = _flashIAP->get_erase_value();
 	_lastEntry = NULL;
 
 	if (_debug) {
@@ -125,8 +124,9 @@ NVProperty_MBEDFlash::_FlashEraseRow(int startRow, int count)
 		uint32_t *startAddr = (uint32_t *)((startRow + i) * _rowSize);
 		uint32_t *addr = startAddr;
 		bool foundData = false;
+		uint32_t emtpyValue = _flashErasedValue << 24 | _flashErasedValue << 16 | _flashErasedValue << 8 | _flashErasedValue;
 		for (int offset = 0; offset < _rowSize; offset += sizeof(uint32_t)) {
-			if (*addr++ != 0xffffffff) {
+			if (*addr++ != emtpyValue) {
 				foundData = true;
 				break;
 			}
@@ -204,7 +204,7 @@ bool
 NVProperty_MBEDFlash::_FlashIsCleared(uint8_t *address, int len)
 {
 	while (len-- > 0) {
-		if (*address++ != NVProperty::PROPERTIES_EOF) {
+		if (*address++ != _flashErasedValue) {
 			return false;
 		}
 	}
@@ -520,7 +520,7 @@ NVProperty_MBEDFlash::_DumpAllEntires(void)
 
 	int index = 0;
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 
 		int64_t value = 0;
     	switch(p->t.type) {
@@ -591,7 +591,7 @@ NVProperty_MBEDFlash::_GetFlashEntry(int key, uint8_t *start)
 		p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
 	_flashEntry *lastP = NULL;
 	while(true) {
-		if ((uint8_t*)p >= _endAddress || p->key == NVProperty::PROPERTIES_EOF) {
+		if ((uint8_t*)p >= _endAddress || p->key == _flashErasedValue) {
 			if ((uint8_t*)p <= _endAddress)
 				_lastEntry = p;
 			if (!lastP || lastP->t.deleted)
@@ -648,7 +648,7 @@ NVProperty_MBEDFlash::_FlashReorgEntries(int minRequiredSpace)
 	int freeSpace = 0;
 	
 	_flashEntry *p = (_flashEntry *)(_startAddress + sizeof(_flash_header));
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 		_flashEntry *k = _GetFlashEntry(p->key);
 		if (k == p) { // current entry is the lastest one.
 			totalLen += _GetFlashEntryLen(k);
@@ -685,7 +685,7 @@ NVProperty_MBEDFlash::_FlashReorgEntries(int minRequiredSpace)
 	memcpy(t, _startAddress, sizeof(_flash_header));
 	t += sizeof(_flash_header);
 	
-	while((uint8_t *)p < _endAddress && p->key != NVProperty::PROPERTIES_EOF) {
+	while((uint8_t *)p < _endAddress && p->key != _flashErasedValue) {
 		_flashEntry *k = _GetFlashEntry(p->key, (uint8_t *)p);
 		if (k == p) {	// current entry is the lastest one.
 			if (!p->t.deleted) {

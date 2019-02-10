@@ -82,6 +82,7 @@ private:
 	int _pageSize;
 	int _numPages;
 	int _rowSize;
+	uint8_t _flashErasedValue;
 	FlashIAP *_flashIAP;
 	uint8_t *_startAddress;
 	uint8_t *_endAddress;
