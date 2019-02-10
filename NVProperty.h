@@ -28,7 +28,11 @@ public:
      * flash blocks are less busy. For the D21 it is a good idea to
 	 * use increments of 16kB because this is the region locking area size
  	 */
+#ifndef TARGET_STM32L0
     NVProperty(int propSizekB = 16, bool erase = false);
+#else
+    NVProperty(int propSizekB = 4, bool erase = false);
+#endif
     ~NVProperty();
 public:
     enum NVPType {
@@ -160,8 +164,7 @@ public:
 		
 		PRIVATE_RANGE_START = 128,
 		PRIVATE_RANGE_END 	= 254,
-		PROPERTIES_EOF		= 255,
-		MAX_PROPERTIES		= 256,
+		MAX_PROPERTIES		= 254, // 1-254
     };
 
 private:
