@@ -11,6 +11,7 @@
 
 
 #include <mbed.h>
+#include "PinMap.h"
 #include "main.h"
 #include "arch.h"
 
