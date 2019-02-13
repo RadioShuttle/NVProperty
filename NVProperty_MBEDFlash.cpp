@@ -52,10 +52,15 @@ NVProperty_MBEDFlash::NVProperty_MBEDFlash(int propSizekB, bool erase)
 	_propSizekB = propSizekB;
 	_pageSize = _flashIAP->get_page_size();
 	_numPages = _flashIAP->get_flash_size() / _pageSize;
-	_rowSize = _flashIAP->get_sector_size(_flashIAP->get_flash_start()); //  pageSize * 4;
+	_rowSize = _flashIAP->get_sector_size(_flashIAP->get_flash_start());
+	MBED_ASSERT(((propSizekB *1024) % _rowSize) == 0);
 	_startAddress = (uint8_t*)_flashIAP->get_flash_start() + ((_numPages-(_propSizekB * 1024)/_pageSize) * _pageSize);
 	_endAddress = _startAddress + (_propSizekB * 1024);
-	_flashErasedValue = _flashIAP->get_erase_value();
+	//	_flashErasedValue = _flashIAP->get_erase_value();
+	_flashErasedValue = 0xff; // until the new mbed flashIAP->get_erase_value() is available
+#ifdef TARGET_STM32L0
+	_flashErasedValue = 0x00;
+#endif
 	_lastEntry = NULL;
 
 	if (_debug) {
