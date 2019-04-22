@@ -151,6 +151,7 @@ public:
 		NET_IP_ADDR		= 36,
 		NET_IP_ROUTER	= 37,
 		NET_IP_DNS_SERVER = 38,
+		NET_IP_DNS_SERVER_ALT = 39,
 		
 		MQTT_SERVER		= 40,	// url mqtt or mqtts://user.password@server:port
 		MQTT_SERVER_ALT	= 41,
