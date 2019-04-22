@@ -151,7 +151,7 @@ public:
 		NET_IP_ADDR		= 36,
 		NET_IP_ROUTER	= 37,
 		NET_IP_DNS_SERVER = 38,
-        
+		
 		MQTT_SERVER		= 40,	// url mqtt or mqtts://user.password@server:port
 		MQTT_SERVER_ALT	= 41,
 		MQTT_TOPIC_INFO	= 42,
@@ -160,7 +160,12 @@ public:
 		MQTT_TOPIC_4	= 45,
 		MQTT_TOPIC_5	= 46,
 		
-		ALARM_STATUS 	= 50,   // alarm on=0, off !0
+		NET_NTP_SERVER	= 50,
+		NET_NTP_SERVER_ALT = 51,
+		NET_NTP_GMTOFFSET = 52,
+		NET_NTP_DAYLIGHTOFFSET = 53,
+
+		ALARM_STATUS 	= 60,   // alarm on=0, off !0
 		
 		PRIVATE_RANGE_START = 128,
 		PRIVATE_RANGE_END 	= 254,
