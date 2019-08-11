@@ -168,6 +168,13 @@ public:
 
 		ALARM_STATUS 	= 60,   // alarm on=0, off !0
 		
+		VOIP_SERVER 	= 70,
+		VOIP_USER		= 71,
+		VOIP_PASSWORD 	= 72,
+		VOIP_DEVNAME 	= 73,
+		VOIP_DIALNO		= 74,
+		VOIP_DIALNO_ALT	= 75,
+		
 		PRIVATE_RANGE_START = 128,
 		PRIVATE_RANGE_END 	= 254,
 		MAX_PROPERTIES		= 254, // 1-254
