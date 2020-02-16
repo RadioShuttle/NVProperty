@@ -16,7 +16,6 @@
 #include <NVProperty_D21Flash.h>
 #include <NVProperty.h>
 
-#include "arduino-util.h"
 
 NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 	_debug = false;
