@@ -27,13 +27,13 @@ The following table gives an estimate for a 32kB NVProperty storage to show how 
 
 Please note: Larger NVProperty storage area will allow better write distribution, larger storage values, e.g. Strings will reduce the number of writes. It is recommended to write properties only when it is needed or collect changes and write it only from time to time.
 
-__Important for D21 Arduino users:__ A custom version of “bossac” must be installed when using the NVProperty library, otherwise, properties cannot be saved. Download it from.  [here Pages](https://www.radioshuttle.de/wp-content/uploads/2018/10/BOSSAC.zip).
+__Important for D21 Arduino users:__ A custom version of “bossac” must be installed when using the NVProperty library, otherwise, properties cannot be saved. Download it from [here](https://www.radioshuttle.de/wp-content/uploads/2018/10/BOSSAC.zip).
 After unpacking the archive you will find the program for three different platforms:
 
 Name	Platform	Directory
-bossac-linux64	Linux	.arduino15/packages/arduino/tools/bossac/1.7.0/
-bossac-macos	macOS	Library/Arduino15/packages/Arduino/tools/bossac/1.7.0/
-bossac.exe	Windows	AppData\Local\Arduino15\packages\arduino\tools\bossac\1.7.0\
+- bossac-linux64	Linux	.arduino15/packages/arduino/tools/bossac/1.7.0/
+- bossac-macos	macOS	Library/Arduino15/packages/Arduino/tools/bossac/1.7.0/
+- bossac.exe	Windows	AppData\Local\Arduino15\packages\arduino\tools\bossac\1.7.0\
 
 Copy the appropriate binary for the platform you are using into the above directory and rename it to “bossac” (“bossac.exe” for the Windows platform is not renamed). For safety reasons it is recommended to backup the existing “bossac” program beforehand, e.g. to “bossac.save”.
 
