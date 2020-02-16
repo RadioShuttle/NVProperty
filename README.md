@@ -27,7 +27,7 @@ The following table gives an estimate for a 32kB NVProperty storage to show how 
 
 Please note: Larger NVProperty storage area will allow better write distribution, larger storage values, e.g. Strings will reduce the number of writes. It is recommended to write properties only when it is needed or collect changes and write it only from time to time.
 
-Important for D21 Arduino users: A custom version of “bossac” must be installed when using the NVProperty library, otherwise, properties cannot be saved. Download it from here: https://www.radioshuttle.de/wp-content/uploads/2018/10/BOSSAC.zip
+__Important for D21 Arduino users:__ A custom version of “bossac” must be installed when using the NVProperty library, otherwise, properties cannot be saved. Download it from.  [here Pages](https://www.radioshuttle.de/wp-content/uploads/2018/10/BOSSAC.zip).
 After unpacking the archive you will find the program for three different platforms:
 
 Name	Platform	Directory
