@@ -31,6 +31,10 @@ Please note: Larger NVProperty storage area will allow better write distribution
 ## TODOs
 - Add ESP32 efuse (OTP) memory writes
 
+## License and contributions
+
+The software is provided under the Apache 2.0 license. Contributions to this project are accepted under the same license.
+
 ##  Credits
 This driver has initially been written by the RadioShuttle engineers (www.radioshuttle.de). Many thanks to everyone who helped bringing this project forward.
 
