@@ -130,7 +130,10 @@ void setup() {
                 if (s)
                   value = s;
             }
-            Serial.printf("%24s: %d=%s\n", propArray[i].name, propArray[i].id, value);
+            char tmpbuf[64];
+            snprintf(tmpbuf, sizeof(tmpbuf), "%24s %d=",  propArray[i].name, propArray[i].id);
+            MYSERIAL.print(tmpbuf);
+            MYSERIAL.println(value);
           }
           MYSERIAL.println("");
         }
@@ -177,7 +180,6 @@ void setup() {
             if (slot == -1)
               MYSERIAL.println("Property: " + String(id) + " not found in table");
             else {
-              // MYSERIAL.printf("Set Property: %s: %d=%s", propArray[slot].name, id, tbuf);
               MYSERIAL.println("Set Property: " + String(propArray[slot].name) + " " + String(id) + " " + String(tbuf));
               p.OpenPropertyStore(true); // enable for write
               if (propArray[slot].type == NVProperty::T_STR) {
