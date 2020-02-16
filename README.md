@@ -1,4 +1,4 @@
-# NVProperty – storage of settings in MCU flash
+# NVProperty – non volatile settings library
 
 A property storage system for storing non volatile settings in MCU flash or OTP memory. The storage is highly memory and flash size optmized. It supports keys and variable data types like bits, numbers, strings and blobs. There are pre-defined enums for storage keys (8-bit, 1-127, e.g. WIFI_SSID = 30) and custom keys (128-254). It supports intelligent re-writing of properties in flash memory to overcome limitations on limited flash write/erase cycles in MCUs, a kind of wear levelling done in software via the NVProperty library.
 
