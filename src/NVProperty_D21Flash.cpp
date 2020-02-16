@@ -1,12 +1,7 @@
 /*
- * This is an unpublished work copyright
- * (c) 2018 Helmut Tschemernjak
+ * Copyright (c) 2019 Helmut Tschemernjak
  * 30826 Garbsen (Hannover) Germany
- *
- *
- * Use is granted to registered RadioShuttle licensees only.
- * Licensees must own a valid serial number and product code.
- * Details see: www.radioshuttle.de
+ * Licensed under the Apache License, Version 2.0);
  */
 
 
@@ -33,73 +28,6 @@ NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 	_endAddress = _startAddress + (_propSizekB * 1024);
 	_lastEntry = NULL;
 
-#if 0
-	int flash_lock_bits = NVMCTRL->LOCK.bit.LOCK ^ 0xffff;
-	int lock_regions = 16; // for all D21 MCUs
-	int region_size = (_pageSize * _numPages) / _lockRegions; // regions per MCU
-	
-	// TODO lock for every bit which is in the areas of the NVMEM
-	if (_debug)
-		dprintf("Nvmctrl Locksbits: %x", flash_lock_bits);
-
-	int required_lock_bits = 0;
-	{
-		/*
-		 * Check how regions bits are required for locking.
-		 */
-		int lockSegSize = (_pageSize * _numPages) / _lockRegions;
-		int nsegs = ((propSizekB * 1024) + (lockSegSize-1)) / lockSegSize;
-		// dprintf("lockSegSize = %d", lockSegSize);
-		// dprintf("nsegs = %d", nsegs);
-		int bits = 0;
-		for (int i = 0; i < lock_regions; i++) {
-			if (nsegs > i) {
-				bits = bits | 1;
-			}
-			// dprintf("bits: 0x%x", bits);
-			bits <<= 1;
-		}
-		bits >>= 1;
-		// dprintf("final bits: 0x%x", bits);
-		required_lock_bits = bits;
-	}
-	
-
-	if (flash_lock_bits & required_lock_bits != required_lock_bits) {
-		/*
-		 * lock remaining regions
-		 */
-		for (int i = 0; i < lock_regions; i++) {
-			if (required_lock_bits & 1) {
-				if (_debug)
-					dprintf("Setting lock bit: %d", i);
-				NVMCTRL->STATUS.reg |= NVMCTRL_STATUS_MASK; // Clear error flags
-				NVMCTRL->ADDR.reg = (uint32_t) (_bootlLoaderSize + (i * region_size)) / 2;
-				NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_LR; // lock
-				while (!NVMCTRL->INTFLAG.bit.READY)
-					;
-			}
-			required_lock_bits >>= 1;
-		}
-	}
-
-	if (flash_lock_bits) {
-		// disable locks which are set by the BOSSA download, see platforms.txt
-		int cur_bit = flash_lock_bits;
-		for (int i = 0; i < lock_regions; i++) {
-			if (cur_bit & 1) {
-				if (_debug)
-					dprintf("Clearing lock bit: %d", i);
-				NVMCTRL->STATUS.reg |= NVMCTRL_STATUS_MASK; // Clear error flags
-				NVMCTRL->ADDR.reg = (uint32_t) (_bootlLoaderSize + (i * region_size)) / 2;
-				NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_UR; // unlock
-				while (!NVMCTRL->INTFLAG.bit.READY)
-					;
-			}
-			cur_bit >>= 1;
-		}
-	}
-#endif
 	
 	if (_debug) {
 		dprintf("_propSizekB: %d kB", _propSizekB);
@@ -119,17 +47,6 @@ NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 NVProperty_D21Flash::~NVProperty_D21Flash() {
 }
 
-#if 0
-const char *testmsg = \
-	"Helmut Tschemernjak Am Kahlen Berg 19 30826 Garbsen" \
-	"Monique Saaber Schaeferdamm 32 30827 Garbsen" \
-	"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" \
-	"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB" \
-	"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC" \
-	"DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD" \
-	"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" \
-	"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-#endif
 
 void
 NVProperty_D21Flash::_FlashInititalize(bool force)

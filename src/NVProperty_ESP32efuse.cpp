@@ -1,14 +1,9 @@
 /*
- * This is an unpublished work copyright
- * (c) 2017 Helmut Tschemernjak
+ * Copyright (c) 2019 Helmut Tschemernjak
  * 30826 Garbsen (Hannover) Germany
- *
- *
- * Use is granted to registered RadioShuttle licensees only.
- * Licensees must own a valid serial number and product code.
- * Details see: www.radioshuttle.de
+ * Licensed under the Apache License, Version 2.0);
  */
-
+ 
 #ifdef ARDUINO_ARCH_ESP32
 
 #include <Arduino.h>
