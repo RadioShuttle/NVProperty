@@ -51,5 +51,5 @@ The software is provided under the Apache 2.0 license. Contributions to this pro
 This driver has initially been written by the RadioShuttle engineers (www.radioshuttle.de). Many thanks to everyone who helped bringing this project forward.
 
 ##  Links
-- Training video: "RadioShuttle - Non Volatile Settings (NVProperty)" https://www.youtube.com/watch?v=8zlBuu4SDGY
-- Training video slides:  ["RadioShuttle - Non Volatile Settings (NVProperty)"](docs/NVProperties-Training-Video-Slides.pdf) 
+- Training video: ["RadioShuttle - Non Volatile Settings (NVProperty)"](https://www.youtube.com/watch?v=8zlBuu4SDGY) 
+- Training slides:  ["RadioShuttle - Non Volatile Settings (NVProperty)"](docs/NVProperties-Training-Video-Slides.pdf) 
