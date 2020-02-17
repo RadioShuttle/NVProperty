@@ -2,9 +2,9 @@
 
 A property storage system for storing non-volatile settings in MCU flash or OTP memory. The storage is highly memory and flash size optmized. It supports keys and variable data types like bits, numbers, strings, and blobs. There are pre-defined enums for storage keys (8-bit, 1-127, e.g. WIFI_SSID = 30) and custom keys (128-254). It supports intelligent re-writing of properties in flash memory to overcome limitations on limited flash write/erase cycles in MCUs, a kind of wear levelling done in the software via the “NVProperty” library.
 
-NVProperty has a general API interface and supports multiple MCU types. Additional MCU models can be added by experienced programmers. The API is very simple to use and is identical on Arduino and Mbed OS, regardless of what kind of MCU is used. A property editor allows setting properties without any programming.
+NVProperty has a general API  and supports multiple MCU types. Additional MCU models can be added by experienced programmers. The API is very simple to use and is identical on Arduino and Mbed OS, regardless of what kind of MCU is used. A property editor allows setting properties without any programming.
 
-CODE as simple as this:
+Example code:
 <pre>
 NVProperty prop;
 const char *ssid = prop.GetProperty(prop.WIFI_SSID);
@@ -52,3 +52,4 @@ This driver has initially been written by the RadioShuttle engineers (www.radios
 
 ##  Links
 - Training video: "RadioShuttle - Non Volatile Settings (NVProperty)" https://www.youtube.com/watch?v=8zlBuu4SDGY
+- Training video slides:  ["RadioShuttle - Non Volatile Settings (NVProperty)"](docs/NVProperties-Training-Video-Slides.pdf) 
