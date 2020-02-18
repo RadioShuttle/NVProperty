@@ -16,6 +16,12 @@
 #include <NVProperty_D21Flash.h>
 #include <NVProperty.h>
 
+#ifdef NV_DEBUG
+ #include "arduino-util.h"
+#else
+ #define dprintf printf
+ #define dump(a,b,c) (void)(a)
+#endif
 
 NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 	_debug = false;
