@@ -100,12 +100,14 @@ struct propArray {
 #endif
 
 void setup() {
-  Serial.begin(115200);
-
+  MYSERIAL.begin(115200);
+  while (!MYSERIAL)
+    ; // wait for serial port to connect. Needed for native USB port only
+ 
   UserProperty p;
   
-  Serial.println("\nWelcome to the Property Editor which allows reading/writing/erasing non volatile settings\n");
-  Serial.println("Properties cmds are:  l (list properties), s (set e.g. s20=value), d (delete e.g. d20), q (quit)\n");
+  MYSERIAL.println("\nWelcome to the Property Editor which allows reading/writing/erasing non volatile settings\n");
+  MYSERIAL.println("Properties cmds are:  l (list properties), s (set e.g. s20=value), d (delete e.g. d20), q (quit)\n");
   bool done = false;
   while(!done) {
     if (MYSERIAL.available() > 0) {
