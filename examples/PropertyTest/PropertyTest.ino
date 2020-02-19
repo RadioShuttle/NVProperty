@@ -55,12 +55,12 @@ void setup() {
    * and must be opened for read-write when needed.
    */
    
-  MYSERIAL.println("OpenPropertyStore: for write, returns " + String(prop.OpenPropertyStore(true))); // enable for write
+  MYSERIAL.println("OpenPropertyStore: for write, returns: " + String(prop.OpenPropertyStore(true))); // enable for write
   /*
    * Set the property as an INT32 and verify that it is available when reading.
    */
   MYSERIAL.println("SetProperty: key=" + String(key) + " value=0x1234 returns: " + String( prop.SetProperty(key, prop.T_32BIT, 0x1234, prop.S_RAM)));
-  MYSERIAL.print("GetProperty: key=" + String(key) + " returns 0x");  MYSERIAL.println(prop.GetProperty(key, 0), HEX);
+  MYSERIAL.print("GetProperty: key=" + String(key) + " returns: 0x");  MYSERIAL.println(prop.GetProperty(key, 0), HEX);
   /*
    * Erase the property and verify that it is not available anymore.
    */
@@ -78,11 +78,11 @@ void setup() {
   key = NVProperty::PRIVATE_RANGE_START + 1; // 129
   MYSERIAL.println("Testing FLASH 32BIT properties");
   MYSERIAL.print("GetProperty: key=" + String(key) + " returns: 0x"); MYSERIAL.println(prop.GetProperty(key, 0), HEX);
-  MYSERIAL.println("OpenPropertyStore: for write, returns " + String(prop.OpenPropertyStore(true))); // enable for write
-  MYSERIAL.println("SetProperty: key=" + String(key) + "  value=0x5678 returns " + String(prop.SetProperty(key, prop.T_32BIT, 0x5678, prop.S_FLASH)));
-  MYSERIAL.print("GetProperty: key=" + String(key) + " returns 0x") , MYSERIAL.println(prop.GetProperty(key, 0), HEX); 
+  MYSERIAL.println("OpenPropertyStore: for write, returns: " + String(prop.OpenPropertyStore(true))); // enable for write
+  MYSERIAL.println("SetProperty: key=" + String(key) + "  value=0x5678 returns: " + String(prop.SetProperty(key, prop.T_32BIT, 0x5678, prop.S_FLASH)));
+  MYSERIAL.print("GetProperty: key=" + String(key) + " returns: 0x") , MYSERIAL.println(prop.GetProperty(key, 0), HEX); 
   MYSERIAL.println("EraseProperty: key=" + String(key) + " returns: " + String(prop.EraseProperty(key, prop.S_FLASH)));
-  MYSERIAL.print("GetProperty: key=" + String(key) + " returns 0x"); MYSERIAL.println(prop.GetProperty(key, 0), HEX);
+  MYSERIAL.print("GetProperty: key=" + String(key) + " returns: 0x"); MYSERIAL.println(prop.GetProperty(key, 0), HEX);
   MYSERIAL.println("\n");
 
   /*
@@ -90,19 +90,20 @@ void setup() {
    */
   key = NVProperty::PRIVATE_RANGE_START + 2; // 130
   MYSERIAL.println("Testing RAM string properties");
-  MYSERIAL.println("GetProperty: key=" + String(key) + " returns " + String(prop.GetProperty(key, "Not found")));
-  MYSERIAL.println("SetProperty: key=" + String(key) + " value=Hello World! returns: " + String(prop.SetProperty(33, prop.T_STR, "Hello World!", prop.S_RAM)));
-  MYSERIAL.println("GetProperty: key=" + String(key) + " returns " + String(prop.GetProperty(key, "Not found")));
+  MYSERIAL.println("GetProperty: key=" + String(key) + " returns: " + String(prop.GetProperty(key, "Not found")));
+  MYSERIAL.println("OpenPropertyStore: for write, returns: " + String(prop.OpenPropertyStore(true))); // enable for write
+  MYSERIAL.println("SetProperty: key=" + String(key) + " value=Hello World! returns: " + String(prop.SetProperty(key, prop.T_STR, "Hello World!", prop.S_RAM)));
+  MYSERIAL.println("GetProperty: key=" + String(key) + " returns: " + String(prop.GetProperty(key, "Not found")));
   MYSERIAL.println("\n");
 
   key = NVProperty::PRIVATE_RANGE_START + 3; // 131
   MYSERIAL.println("Testing FLASH string properties");
-  MYSERIAL.println("GetProperty: key=" + String(key) + " returns " + String(prop.GetProperty(key, "Not found")));
-  MYSERIAL.println("EraseProperty: key=" + String(key) + " returns " + String(prop.EraseProperty(key)));
-  MYSERIAL.println("GetProperty: key=" + String(key) + " returns " + String(prop.GetProperty(key, "Not found")));
-  MYSERIAL.println("OpenPropertyStore: for write, returns " + String(prop.OpenPropertyStore(true))); // enable for write
-  MYSERIAL.println("SetProperty: key=" + String(key) + " value=Hello World! returns " + String(prop.SetProperty(key, prop.T_STR, "Hello World!", prop.S_FLASH)));
-  MYSERIAL.println("GetProperty: key=" + String(key) + " returns " + String(prop.GetProperty(key, "Not found")));
+  MYSERIAL.println("GetProperty: key=" + String(key) + " returns: " + String(prop.GetProperty(key, "Not found")));
+  MYSERIAL.println("EraseProperty: key=" + String(key) + " returns: " + String(prop.EraseProperty(key)));
+  MYSERIAL.println("GetProperty: key=" + String(key) + " returns: " + String(prop.GetProperty(key, "Not found")));
+  MYSERIAL.println("OpenPropertyStore: for write, returns: " + String(prop.OpenPropertyStore(true))); // enable for write
+  MYSERIAL.println("SetProperty: key=" + String(key) + " value=Hello World! returns: " + String(prop.SetProperty(key, prop.T_STR, "Hello World!", prop.S_FLASH)));
+  MYSERIAL.println("GetProperty: key=" + String(key) + " returns: " + String(prop.GetProperty(key, "Not found")));
 
   // TODO Blobs
   
