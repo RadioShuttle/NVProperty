@@ -41,8 +41,7 @@ Copy the appropriate binary for the platform you are using into the above direct
 
 
 ## TODOs
-- Add ESP32 efuse (OTP) memory writes
-- Test/Fix set string property in RAM (fails on D21/ESP32, must be debugged). See PropertyTest.ino
+- Add ESP32 efuse (OTP) memory write support (the ESP has only a few bytes, however a new ESP will have more )
 
 ## License and contributions
 
