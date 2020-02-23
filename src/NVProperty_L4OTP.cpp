@@ -520,7 +520,21 @@ NVProperty_L4OTP::_OTPWrite(uint8_t *address, const void *d, size_t length)
 #ifdef OTP_TEST_IN_RAM
 	memcpy(address, d, length);
 #else
-	OTPWrite(address, d, length);
+	uint8_t *data = (uint8_t *)d;
+	uint32_t addr = (uint32_t)address;
+	volatile uint64_t data64;
+
+	HAL_FLASH_Unlock();
+	while (length > 0) {
+		for (uint8_t i = 0; i < 8; i++) {
+			*(((uint8_t *) &data64) + i) = *(data + i);
+        }
+	    HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, addr, data64);
+		addr += 8;
+		data += 8;
+		length -= 8;
+	}
+    HAL_FLASH_Lock();
 #endif
 }
 
