@@ -30,7 +30,7 @@ public:
 
 // #define ARRAYLEN(arr) (sizeof(arr) / sizeof(0[arr]))
 
-struct propArray {
+static struct propArray {
 	int id;
 	NVProperty::NVPType type;
 	const char *name;
