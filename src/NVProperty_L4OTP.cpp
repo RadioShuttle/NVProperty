@@ -18,6 +18,10 @@
 #define	dump(a,b,c)		void()
 #endif
 
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
+
 #if 0	// sample test code for a main app.
 	{
 	NVProperty p;
@@ -447,6 +451,7 @@ NVProperty_L4OTP::_DumpAllEntires(void)
 		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
 	}
 	int freebytes = _endAddress -(uint8_t *)_lastEntry;
+	UNUSED(freebytes);
 	if (_lastEntry)
 		dprintf("------ %d bytes free -------", freebytes);
 }
