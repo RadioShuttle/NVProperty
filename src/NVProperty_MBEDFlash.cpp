@@ -7,13 +7,20 @@
 #ifdef __MBED__
 
 #include <mbed.h>
-#include "main.h"
-#include "arch.h"
+#include "PinMap.h"
 #include <algorithm>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_MBEDFlash.h>
 #include <NVProperty.h>
 
+#ifndef DPRINTF_AVAILABLE
+#define	dprintf(...)	void()
+#define	dump(a,b,c)		void()
+#endif
+
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
 
 #if 0	// sample test code for a main app.
 	{
@@ -509,7 +516,7 @@ NVProperty_MBEDFlash::ClosePropertyStore(bool flush)
     return NVProperty::NVP_OK;
 }
 
-#if 1
+
 void
 NVProperty_MBEDFlash::_DumpAllEntires(void)
 {
@@ -575,10 +582,11 @@ NVProperty_MBEDFlash::_DumpAllEntires(void)
 		p = (_flashEntry *)((uint8_t *)p + _GetFlashEntryLen(p));
 	}
 	int freebytes = _endAddress -(uint8_t *)_lastEntry;
+	UNUSED(freebytes);
 	if (_lastEntry)
 		dprintf("------ %d bytes free -------", freebytes);
 }
-#endif
+
 
 NVProperty_MBEDFlash::_flashEntry *
 NVProperty_MBEDFlash::_GetFlashEntry(int key, uint8_t *start)
@@ -660,6 +668,7 @@ NVProperty_MBEDFlash::_FlashReorgEntries(int minRequiredSpace)
 			return 0;
 	
 	freeSpace = _endAddress - (_startAddress + sizeof(_flash_header) + totalLen);
+	UNUSED(freeSpace);
 	if (_debug)
 		dprintf("freeSpace: %d, totalLen: %d", freeSpace, totalLen);
 	

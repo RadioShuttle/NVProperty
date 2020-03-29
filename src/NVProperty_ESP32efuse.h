@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVPROPERTY_ESP32EFUSE__
-#define __NVPROPERTY_ESP32EFUSE__
+#ifndef __NVPROPERTY_ESP32EFUSE_H__
+#define __NVPROPERTY_ESP32EFUSE_H__
 
 class NVProperty_ESP32efuse : public NVPropertyProviderInterface {
 public:
@@ -22,4 +22,4 @@ public:
     virtual int ClosePropertyStore(bool flush = false);
 };
 
-#endif // __NVPROPERTY_ESP32EFUSE__
+#endif // __NVPROPERTY_ESP32EFUSE_H__

@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVPROPERTY_L4OTP__
-#define __NVPROPERTY_L4OTP__
+#ifndef __NVPROPERTY_L4OTP_H__
+#define __NVPROPERTY_L4OTP_H__
 
 class NVProperty_L4OTP : public NVPropertyProviderInterface {
 public:
@@ -80,4 +80,4 @@ private:
 	static const int FLASH_PROP_VERSION = 1;
 };
 
-#endif // __NVPROPERTY_L4OTP__
+#endif // __NVPROPERTY_L4OTP_H__

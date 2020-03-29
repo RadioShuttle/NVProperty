@@ -7,13 +7,16 @@
 #ifdef TARGET_STM32L4
 
 #include <mbed.h>
-#include "main.h"
-#include "arch.h"
+#include "PinMap.h"
 #include <algorithm>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_L4OTP.h>
 #include <NVProperty.h>
 
+#ifndef DPRINTF_AVAILABLE
+#define	dprintf(...)	void()
+#define	dump(a,b,c)		void()
+#endif
 
 #if 0	// sample test code for a main app.
 	{
@@ -379,7 +382,6 @@ NVProperty_L4OTP::ClosePropertyStore(bool flush)
     return NVProperty::NVP_OK;
 }
 
-#if 1
 void
 NVProperty_L4OTP::_DumpAllEntires(void)
 {
@@ -448,7 +450,6 @@ NVProperty_L4OTP::_DumpAllEntires(void)
 	if (_lastEntry)
 		dprintf("------ %d bytes free -------", freebytes);
 }
-#endif
 
 NVProperty_L4OTP::_flashEntry *
 NVProperty_L4OTP::_GetFlashEntry(int key, uint8_t *start)

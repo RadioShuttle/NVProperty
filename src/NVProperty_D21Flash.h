@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVPROPERTY_D21FLASHE__
-#define __NVPROPERTY_D21FLASHE__
+#ifndef __NVPROPERTY_D21FLASHE_H__
+#define __NVPROPERTY_D21FLASHE_H__
 
 class NVProperty_D21Flash : public NVPropertyProviderInterface {
 public:
@@ -89,4 +89,4 @@ private:
 
 };
 
-#endif // __NVPROPERTY_D21FLASHE__
+#endif // __NVPROPERTY_D21FLASHE_H__

@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVPROPERTY_MBEDFLASH__
-#define __NVPROPERTY_MBEDFLASH__
+#ifndef __NVPROPERTY_MBEDFLASH_H__
+#define __NVPROPERTY_MBEDFLASH_H__
 
 class NVProperty_MBEDFlash : public NVPropertyProviderInterface {
 public:
@@ -86,4 +86,4 @@ private:
 	static const int FLASH_PROP_VERSION = 1;
 };
 
-#endif // __NVPROPERTY_MBEDLASH__
+#endif // __NVPROPERTY_MBEDFLASH_H__

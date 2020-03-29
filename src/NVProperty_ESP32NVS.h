@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVProperty_ESP32NVS__
-#define __NVProperty_ESP32NVS__
+#ifndef __NVPROPERTY_ESP32NVS_H__
+#define __NVPROPERTY_ESP32NVS_H__
 
 
 class NVProperty_ESP32NVS : public NVPropertyProviderInterface {
@@ -35,4 +35,4 @@ private:
     bool _didWrite;
 };
 
-#endif // __NVProperty_ESP32NVS__
+#endif // __NVPROPERTY_ESP32NVS_H__

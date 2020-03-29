@@ -8,11 +8,11 @@
 #include <mbed.h>
 #include "PinMap.h"
 #include "main.h"
-#include "arch.h"
 
 #ifdef FEATURE_NVPROPERTYEDITOR
 #include <NVPropertyProviderInterface.h>
 #include "NVProperty.h"
+
 
 static const char *getNiceName(int id, int val);
 
@@ -28,7 +28,9 @@ public:
 	};
 };
 
-// #define ARRAYLEN(arr) (sizeof(arr) / sizeof(0[arr]))
+#ifndef ARRAYLEN
+#define ARRAYLEN(arr) (sizeof(arr) / sizeof(0[arr]))
+#endif
 
 static struct propArray {
 	int id;
@@ -129,7 +131,7 @@ void NVPropertyEditor(void)
 							value = s;
 					}
 					rprintf("%24s: %d=%s\r\n", propArray[i].name, propArray[i].id, value);
-					wait_ms(2); // to flush buffers
+					wait_us(2 * 1000); // to flush buffers
 				}
 				rprintf("\r\n");
 			}

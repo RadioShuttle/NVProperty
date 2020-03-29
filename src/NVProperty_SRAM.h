@@ -4,8 +4,8 @@
  * Licensed under the Apache License, Version 2.0);
  */
 
-#ifndef __NVSProperty_SRAM__
-#define __NVSProperty_SRAM__
+#ifndef __NVSPROPERTY_SRAM_H__
+#define __NVSPROPERTY_SRAM_H__
 
 
 #ifdef ARDUINO
@@ -47,4 +47,4 @@ private:
     std::map<int, PropertyEntry> _props;
 };
 
-#endif // __NVSProperty_SRAM__
+#endif // __NVSPROPERTY_SRAM_H__

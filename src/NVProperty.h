@@ -183,4 +183,4 @@ private:
     bool _didOpen;
 };
 
-#endif
+#endif // __NVPROPERTY_H__
