@@ -32,6 +32,15 @@
 #include <NVProperty.h>
 
 
+
+#ifdef __ARMCC_VERSION
+char* strdup(const char* s) // strdup is missing using the ARM MDK compiler
+{
+	char* result = (char *)malloc(strlen(s) + 1);
+	return result;
+}
+#endif
+
 NVProperty::NVProperty(int propSizekB, bool erase)
 {
     _flash = NULL;

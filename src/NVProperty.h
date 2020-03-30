@@ -12,6 +12,10 @@
  #define UNUSED(x) (void)(x)
 #endif
 
+#ifdef __ARMCC_VERSION
+extern char * strdup(const char *);
+#endif
+
 class NVProperty {
 public:
 	/*
