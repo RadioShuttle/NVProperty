@@ -13,7 +13,7 @@
 #endif
 
 #ifdef __ARMCC_VERSION
-extern char * strdup(const char *);
+#include "arch.h" // for strdup
 #endif
 
 class NVProperty {
