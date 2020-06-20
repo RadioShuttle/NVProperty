@@ -86,6 +86,9 @@ struct propArray {
   { NVProperty::VOIP_DEVNAME,      NVProperty::T_STR,     "VOIP_DEVNAME", 0, NULL },
   { NVProperty::VOIP_DIALNO,       NVProperty::T_STR,     "VOIP_DIALNO", 0, NULL },
   { NVProperty::VOIP_DIALNO_ALT,   NVProperty::T_STR,     "VOIP_DIALNO_ALT", 0, NULL },
+
+  { NVProperty::PROG_CMDLINE,      NVProperty::T_STR,     "PROG_CMDLINE", 0, NULL },
+
   /*
    * A user defined property
    */

@@ -87,6 +87,15 @@ static struct propArray {
 
 	{ NVProperty::ALARM_STATUS,       NVProperty::T_32BIT,  "ALARM_STATUS", 0, NULL },
 
+	{ NVProperty::VOIP_SERVER,       NVProperty::T_STR,     "VOIP_SERVER", 0, NULL },
+	{ NVProperty::VOIP_USER,         NVProperty::T_STR,     "VOIP_USER", 0, NULL },
+	{ NVProperty::VOIP_PASSWORD,     NVProperty::T_STR,     "VOIP_PASSWORD", 0, NULL },
+	{ NVProperty::VOIP_DEVNAME,      NVProperty::T_STR,     "VOIP_DEVNAME", 0, NULL },
+	{ NVProperty::VOIP_DIALNO,       NVProperty::T_STR,     "VOIP_DIALNO", 0, NULL },
+	{ NVProperty::VOIP_DIALNO_ALT,   NVProperty::T_STR,     "VOIP_DIALNO_ALT", 0, NULL },
+
+	{ NVProperty::PROG_CMDLINE,       NVProperty::T_STR, 	"PROG_CMDLINE", 0, NULL },
+
 	/*
 	* A user defined property
 	*/

@@ -122,7 +122,7 @@ public:
 		ADC_VREF		= 2, // the adc refernce volatge in millivolt
 		HARDWARE_REV	= 3, // the hardware revision of the board
 		CPUID			= 4, // the internal CPU ID
-        
+
 		LORA_DEVICE_ID	= 10, // uint32_t the LoRa device ID
 		LORA_CODE_ID	= 11, // uint32_t the Code for the RadioShuttle protocol
 		LORA_REMOTE_ID	= 12, // specifies the server address
@@ -174,6 +174,8 @@ public:
 		VOIP_DIALNO		= 74,
 		VOIP_DIALNO_ALT	= 75,
 		
+		PROG_CMDLINE	= 80, // the programm command line
+
 		PRIVATE_RANGE_START = 128,
 		PRIVATE_RANGE_END 	= 254,
 		MAX_PROPERTIES		= 254, // 1-254
