@@ -7,7 +7,7 @@
 #ifdef __MBED__
 
 #include <mbed.h>
-#include "PinMap.h"
+#include "xPinMap.h"
 #include <algorithm>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_MBEDFlash.h>

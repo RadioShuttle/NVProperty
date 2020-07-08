@@ -7,7 +7,7 @@
 #ifdef TARGET_STM32L4
 
 #include <mbed.h>
-#include "PinMap.h"
+#include "xPinMap.h"
 #include <algorithm>
 #include <NVPropertyProviderInterface.h>
 #include <NVProperty_L4OTP.h>

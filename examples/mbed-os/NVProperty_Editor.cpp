@@ -6,7 +6,6 @@
 
 
 #include <mbed.h>
-#include "PinMap.h"
 #include "main.h"
 
 #ifdef FEATURE_NVPROPERTYEDITOR
