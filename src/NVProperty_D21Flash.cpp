@@ -41,7 +41,7 @@ NVProperty_D21Flash::NVProperty_D21Flash(int propSizekB, bool erase) {
 		dprintf("_rowSize: %d", _rowSize);
 		dprintf("PageOffset: %d", _numPages-((_propSizekB * 1024)/_pageSize));
 		dprintf("total: %d", _pageSize * _numPages);
-		dprintf("_startAddress: %d", _startAddress);
+		dprintf("_startAddress: 0x%lx", (uint32_t)_startAddress);
 	}
 	_FlashInititalize(erase);
 	_GetFlashEntry(0); // inits the _lastEntry record
@@ -107,7 +107,7 @@ NVProperty_D21Flash::_FlashEraseRow(int startRow, int count)
 			}
 		}
 		if (_debug)
-			dprintf("_FlashEraseRow: addr=0x%x, count=%d (%s)", startAddr, i,
+			dprintf("_FlashEraseRow: addr=0x%lx, count=%d (%s)", (uint32_t)startAddr, i,
 					foundData ? "erased" : "skipped");
 		if (!foundData)
 			continue;
