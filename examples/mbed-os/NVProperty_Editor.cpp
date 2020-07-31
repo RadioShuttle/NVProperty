@@ -81,7 +81,7 @@ static struct propArray {
 	{ NVProperty::MQTT_TOPIC_INFO,    NVProperty::T_STR,    "MQTT_TOPIC_INFO", 0, NULL },
 	{ NVProperty::MQTT_TOPIC_ALARM,   NVProperty::T_STR,    "MQTT_TOPIC_ALARM", 0, NULL },
 	{ NVProperty::MQTT_TOPIC_CONTROL, NVProperty::T_STR,    "MQTT_TOPIC_CONTROL", 0, NULL },
-	{ NVProperty::MQTT_TOPIC_GATEWAY, NVProperty::T_STR,    "MQTT_TOPIC_4", 0, NULL },
+	{ NVProperty::MQTT_TOPIC_GATEWAY, NVProperty::T_STR,    "MQTT_TOPIC_GATEWAY", 0, NULL },
 	{ NVProperty::MQTT_TOPIC_5,       NVProperty::T_STR,    "MQTT_TOPIC_5", 0, NULL },
 
 	{ NVProperty::ALARM_STATUS,       NVProperty::T_32BIT,  "ALARM_STATUS", 0, NULL },
