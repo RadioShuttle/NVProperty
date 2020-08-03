@@ -70,7 +70,7 @@ static struct propArray {
 	{ NVProperty::NET_IP_ADDR,        NVProperty::T_STR,    "NET_IP_ADDR", 0, NULL },
 	{ NVProperty::NET_IP_ROUTER,      NVProperty::T_STR,    "NET_IP_ROUTER", 0, NULL },
 	{ NVProperty::NET_IP_DNS_SERVER,  NVProperty::T_STR,    "NET_IP_DNS_SERVER", 0, NULL },
-	{ NVProperty::NET_IP_DNS_SERVER_ALT,  NVProperty::T_STR,    "NET_IP_DNS_SERVer_ALT", 0, NULL },
+	{ NVProperty::NET_IP_DNS_SERVER_ALT,  NVProperty::T_STR,    "NET_IP_DNS_SERVER_ALT", 0, NULL },
 
 	{ NVProperty::NET_NTP_SERVER,  NVProperty::T_STR,    "NET_NTP_SERVER", 0, NULL },
 	{ NVProperty::NET_NTP_SERVER_ALT,NVProperty::T_STR,    "NET_NTP_SERVER_ALT", 0, NULL },
