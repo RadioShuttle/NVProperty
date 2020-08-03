@@ -1,19 +1,20 @@
-/*
- * Copyright (c) 2019 Helmut Tschemernjak
- * 30826 Garbsen (Hannover) Germany
- * Licensed under the Apache License, Version 2.0);
- */
 
-
+#ifdef ARDUINO
+#include <Arduino.h>
+#include <arduino-util.h>
+#include <arduino-mbed.h>
+#endif
+#ifdef __MBED__
 #include <mbed.h>
 #include "main.h"
+#endif
 
-#ifdef FEATURE_NVPROPERTYEDITOR
+
 #include <NVPropertyProviderInterface.h>
 #include "NVProperty.h"
 
+#include "NVProperty_Editor.h"
 
-static const char *getNiceName(int id, int val);
 
 /*
  * add custom user defined properties here
@@ -42,8 +43,8 @@ static struct propArray {
 	{ NVProperty::ADC_VREF,           NVProperty::T_32BIT,  "ADC_VREF", 0, NULL },
 	{ NVProperty::HARDWARE_REV,       NVProperty::T_32BIT,  "HARDWARE_REV", 0, NULL },
 
-	{ NVProperty::LORA_DEVICE_ID,     NVProperty::T_32BIT,  "LORA_DEVICE_ID", 0, NULL },  
-	{ NVProperty::LORA_CODE_ID,       NVProperty::T_32BIT,  "LORA_CODE_ID", 0, NULL },  
+	{ NVProperty::LORA_DEVICE_ID,     NVProperty::T_32BIT,  "LORA_DEVICE_ID", 0, NULL },
+	{ NVProperty::LORA_CODE_ID,       NVProperty::T_32BIT,  "LORA_CODE_ID", 0, NULL },
 	{ NVProperty::LORA_REMOTE_ID,     NVProperty::T_32BIT,  "LORA_REMOTE_ID", 0, NULL },
 	{ NVProperty::LORA_REMOTE_ID_ALT, NVProperty::T_32BIT,  "LORA_REMOTE_ID_ALT", 0, NULL },
 	{ NVProperty::LORA_RADIO_TYPE,    NVProperty::T_32BIT,  "LORA_RADIO_TYPE", 0, NULL },
@@ -101,7 +102,64 @@ static struct propArray {
 	{ UserProperty::MY_CITY,          NVProperty::T_STR,    "MY_CITY", 0, NULL },
 };
 
-void NVPropertyEditor(void)
+static const char *getNiceName(int id, int val)
+{
+  const char *name = "";
+  
+  switch(id) {
+    case NVProperty::LORA_RADIO_TYPE:
+      if (val == 1)
+        return "RS_Node_Offline";
+      else if (val == 2)
+        return "RS_Node_Checking";
+      else if (val == 3)
+        return "RS_Node_Online";
+      else if (val == 4)
+        return "RS_Station_Basic";
+      else if (val == 5)
+        return "RS_Station_Server";
+      break;
+    default:
+      break;
+  }
+  return name;
+}
+
+#ifdef ARDUINO
+// the mbed case is defined in main.h
+Stream *serial;
+void NVPropertyEditorInit(Stream *MYSERIAL)
+{
+	serial = MYSERIAL;
+}
+
+char *ConsoleReadline(char *buf, int buflen, bool echo, int timeout_ms)
+{
+	if (!serial)
+		return NULL;
+	echo = false;
+    delay(10); // give the UART some time to receive data
+    memset(buf, 0, buflen);
+    int cnt = 0;
+	while (serial->available() > 0) {
+        char c = serial->read();
+        if (c == '\n' || c == '\r')
+          break;
+		if (cnt >= buflen-2)
+			break;
+		buf[cnt++] = c;
+	}
+	if (cnt == 0)
+		buf = NULL;
+	
+    sleep(); // make the WatchDog happy
+	while(serial->available() > 0)
+	  serial->read(); // flush input
+	return buf;
+}
+#endif
+
+int NVPropertyEditor(void)
 {
 	NVProperty p;
 	
@@ -113,8 +171,10 @@ void NVPropertyEditor(void)
 		char buf[80];
 		
 		memset(buf, 0, sizeof(buf));
-		
+
+#ifndef ARDUINO
 		rprintf("$ ");
+#endif
 		const char *cmd = ConsoleReadline(buf, (int)sizeof(buf), true);
 		if (!cmd)
 			continue;
@@ -209,35 +269,10 @@ void NVPropertyEditor(void)
 				p.ReorgProperties();
 				break;
 			case 'q':
-				return;
+				return 0;
 			default:
 				rprintf(help);
 				break;
 		}
 	}
 }
-
-
-static const char *getNiceName(int id, int val)
-{
-  const char *name = "";
-	
-  switch(id) {
-    case NVProperty::LORA_RADIO_TYPE:
-      if (val == 1)
-        return "RS_Node_Offline";
-      else if (val == 2)
-        return "RS_Node_Checking";
-      else if (val == 3)
-        return "RS_Node_Online";
-      else if (val == 4)
-        return "RS_Station_Basic";
-      else if (val == 5)
-        return "RS_Station_Server";
-      break;
-    default:
-      break;
-  }
-  return name;
-}
-#endif
