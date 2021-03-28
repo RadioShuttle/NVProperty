@@ -96,6 +96,10 @@ static struct propArray {
 
 	{ NVProperty::PROG_CMDLINE,       NVProperty::T_STR, 	"PROG_CMDLINE", 0, NULL },
 
+	{ NVProperty::SENSOR_TYPE,		NVProperty::T_32BIT,  "SENSOR_TYPE", 0, NULL },
+	{ NVProperty::SENSOR_INTERVAL,	NVProperty::T_32BIT,  "SENSOR_INTERVAL", 0, NULL },
+	{ NVProperty::SENSOR_THRESHOLD,	NVProperty::T_32BIT,  "SENSOR_THRESHOLD", 0, NULL },
+
 	/*
 	* A user defined property
 	*/

@@ -175,6 +175,10 @@ public:
 		VOIP_DIALNO_ALT	= 75,
 		
 		PROG_CMDLINE	= 80, // the programm command line
+		
+		SENSOR_TYPE		= 90, // sensor specifiy parameters
+		SENSOR_INTERVAL	= 91,
+		SENSOR_THRESHOLD = 92,	// threshold for identifying new data set
 
 		PRIVATE_RANGE_START = 128,
 		PRIVATE_RANGE_END 	= 254,
