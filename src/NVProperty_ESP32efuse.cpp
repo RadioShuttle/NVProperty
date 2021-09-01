@@ -19,12 +19,15 @@
 int
 NVProperty_ESP32efuse::GetProperty(int key)
 {
+#ifdef ARDUINO_ESP32C3_DEV
+	return 0;
+#else
     int value;
     
     switch(key) {
         case NVProperty::RTC_AGING_CAL: {
             uint32_t RTC_SIGN_BIT = 0x80;
-#ifdef ARDUINO_ESP32S2_DEV
+#if defined(ARDUINO_ESP32S2_DEV) || defined(ARDUINO_ESP32S2_USB)
 			uint32_t *val = (uint32_t *)EFUSE_RD_USR_DATA0_REG;
 #else
             uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
@@ -42,7 +45,7 @@ NVProperty_ESP32efuse::GetProperty(int key)
             uint32_t stepsize = 7;
             uint32_t signbit = 0x10;
             uint32_t databits = 0x0f;
-#ifdef ARDUINO_ESP32S2_DEV
+#if defined(ARDUINO_ESP32S2_DEV) || defined(ARDUINO_ESP32S2_USB)
 			uint32_t unkn = 0;
 			uint32_t *val = &unkn;
 #else
@@ -71,7 +74,7 @@ NVProperty_ESP32efuse::GetProperty(int key)
         }
         break;
         case NVProperty::LORA_DEVICE_ID: {
-#ifdef ARDUINO_ESP32S2_DEV
+#if defined(ARDUINO_ESP32S2_DEV) || defined(ARDUINO_ESP32S2_USB)
 			uint32_t *val = (uint32_t *)EFUSE_RD_USR_DATA0_REG;
 #else
 			uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA6_REG;
@@ -83,7 +86,7 @@ NVProperty_ESP32efuse::GetProperty(int key)
         }
             break;
         case NVProperty::LORA_CODE_ID: {
-#ifdef ARDUINO_ESP32S2_DEV
+#if defined(ARDUINO_ESP32S2_DEV) || defined(ARDUINO_ESP32S2_USB)
 			uint32_t *val = (uint32_t *)EFUSE_RD_USR_DATA1_REG;
 #else
             uint32_t *val = (uint32_t *)EFUSE_BLK3_RDATA7_REG;
@@ -97,6 +100,7 @@ NVProperty_ESP32efuse::GetProperty(int key)
             return NVProperty::NVP_ENOENT;
     }
     return value;
+#endif // not C3
 }
 
 
